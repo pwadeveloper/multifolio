@@ -1,0 +1,25 @@
+.work-admin-password
+__pycache__/
+.gstack/
+.env
+.env.*
+!.env.example
+.vercel/
+dist/
+node_modules/
+.DS_Store
+.gstack/
+mirror/_cdn/
+mirror/audio/
+mirror/articles/
+mirror/articles.rsc
+mirror/engineering/
+mirror/engineering.rsc
+mirror/design/*/
+mirror/design/*.rsc
+!mirror/design/index.html
+mirror/opengraph/
+mirror/TRAIL DATA/
+mirror/_manifest.json
+mirror/sitemap.xml
+mirror/robots.txt

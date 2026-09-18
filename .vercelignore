@@ -1,0 +1,16 @@
+.git
+.gstack
+.work-admin-password
+.env*
+admin/
+admin_server.py
+serve.py
+__pycache__/
+tests/
+mirror/_cdn/
+mirror/audio/
+mirror/articles/
+mirror/articles.rsc
+mirror/engineering/
+mirror/engineering.rsc
+mirror/opengraph/

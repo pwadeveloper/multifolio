@@ -1,0 +1,12 @@
+{
+  "name": "multifolio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "dev": "node --env-file-if-exists=.env.local dev-server.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {"node": "22.x"}
+}
