@@ -23,14 +23,14 @@ publish them. The private manager is intentionally not deployed to Vercel.
 ## Payments and booking
 
 The starting package is **4 short videos + 1 long-form video**, priced at
-**₦400,000 NGN or $350 USD**, as a **one-time payment**. There is no recurring
+**₦450,000 NGN or $350 USD**, as a **one-time payment**. There is no recurring
 subscription or automatic monthly charge.
 
 “Book an intro call” opens:
 https://calendar.app.google/4Z1x1rKG1f6mJqTu9
 
 “Start my retainer” opens `/checkout`. The server validates the customer details,
-sets the amount itself (40,000,000 kobo or 35,000 US cents), initializes Paystack,
+sets the amount itself (45,000,000 kobo or 35,000 US cents), initializes Paystack,
 and sends the customer to hosted checkout. The callback verifies payment status,
 reference, currency, amount, and package metadata against Paystack before showing
 confirmation. Payment records remain in the Paystack dashboard. This version

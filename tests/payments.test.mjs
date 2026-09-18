@@ -11,7 +11,7 @@ test('checkout pins amount, creates reference, and uses no subscription plan',as
  const result=await initialize({...input,amount:1,callback_url:'https://evil.example'},'https://multifolio.example',env,async(url,options)=>{
   assert.equal(url,'https://api.paystack.co/transaction/initialize');sent=JSON.parse(options.body);return ok({authorization_url:'https://checkout.paystack.com/fixture',reference:sent.reference});
  });
- assert.equal(sent.amount,40000000);assert.equal(sent.currency,'NGN');assert.equal(sent.metadata.billing,'one_time');assert.equal(sent.plan,undefined);
+ assert.equal(sent.amount,45000000);assert.equal(sent.currency,'NGN');assert.equal(sent.metadata.billing,'one_time');assert.equal(sent.plan,undefined);
  assert.match(sent.callback_url,/^https:\/\/multifolio\.example\/checkout\?reference=mf-/);assert.equal(result.url,'https://checkout.paystack.com/fixture');
 });
 test('USD uses fixed $350 and must be enabled explicitly',async()=>{
@@ -25,7 +25,7 @@ test('missing key disables payments without leaking credentials',()=>{
  assert.equal(settings({}).enabled,false);assert.equal(settings(env).enabled,true);assert.equal(settings(env).billing,'one_time');assert.ok(!JSON.stringify(settings(env)).includes('sk_test'));
 });
 test('payment verification requires successful status and exact package, amount, currency and reference',async()=>{
- const data={status:'success',reference:ref,amount:40000000,currency:'NGN',metadata:{package_id:PACKAGE_ID,billing:'one_time'}};
+ const data={status:'success',reference:ref,amount:45000000,currency:'NGN',metadata:{package_id:PACKAGE_ID,billing:'one_time'}};
  assert.equal((await verify(ref,env,async()=>ok(data))).paid,true);
  assert.equal((await verify(ref,env,async()=>ok({...data,status:'pending'}))).paid,false);
  for(const patch of [{amount:1},{currency:'EUR'},{reference:'other'},{metadata:{package_id:'other'}}])await assert.rejects(()=>verify(ref,env,async()=>ok({...data,...patch})),/does not match/);
