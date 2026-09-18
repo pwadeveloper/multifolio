@@ -56,7 +56,7 @@ main = el('main', [
             el('details', [el('summary','How do we decide the scope?'),el('p','We’ll agree on video lengths, the editing style, revisions, and the delivery timeline before work starts.')]),
         ],className='pricing-faq'),
     ],className='pricing-notes'),
-    el('footer',[el('span','MULTIMUDIA'),el('span','Made to be watched.')],className='pricing-footer'),
+    el('footer',[el('span','MULTIMUDIA'),el('span','God Revealed in Many Media Forms')],className='pricing-footer'),
 ], className='pricing-page')
 
 DESC='4 short videos and 1 long-form video. ₦450,000.'

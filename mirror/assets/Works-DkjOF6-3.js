@@ -9,7 +9,7 @@ export default function Works({initialFilter = 'All'}) {
   const [filter, setFilter] = React.useState(filters.some(item => item.value === initialFilter) ? initialFilter : 'All');
   return jsxs('main', {className:'works-page','data-active-filter':filter, children:[
     jsx(Nav, {items:filters,value:filter,onValueChange:setFilter,ariaLabel:'Filter work',fullWidth:true,className:'works-filter-nav'}),
-    jsx('h1', {className:'works-intro',children:'Hi, I am Multimudia, and here is some of my video editing work for short form content'}),
+    jsx('h1', {className:'works-intro',children:'Hi, I am Mudia Imasuen (Multimudia), and here is some of my video editing work for short and long form content.'}),
     jsx(EmbedWorks, {filter})
   ]});
 }
