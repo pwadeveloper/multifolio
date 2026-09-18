@@ -55,3 +55,14 @@ test('failed payments surface and log the Paystack reason without leaking the ke
  assert.equal(logged.history[0].message,'Denied by Fraud System.');
  assert.ok(!JSON.stringify(lines).includes('sk_test'));
 });
+test('fee-inclusive gross is accepted, underpayment is not, and mismatches name the failing check',async()=>{
+ const base={status:'success',reference:ref,currency:'NGN',metadata:{package_id:PACKAGE_ID,billing:'one_time'}};
+ // Paystack reports 203046 gross when the customer bears the NGN 30.46 transfer fee
+ assert.equal((await verify(ref,env,async()=>ok({...base,amount:203046}))).paid,true);
+ assert.equal((await verify(ref,env,async()=>ok({...base,amount:200000}))).paid,true);
+ await assert.rejects(()=>verify(ref,env,async()=>ok({...base,amount:199999})),/does not match/);
+ const lines=[];const original=console.log;console.log=line=>lines.push(line);
+ try{ await assert.rejects(()=>verify(ref,env,async()=>ok({...base,amount:1}))); }finally{ console.log=original; }
+ const logged=lines.map(line=>JSON.parse(line)).find(entry=>entry.event==='payment.mismatch');
+ assert.deepEqual(logged.failed,['amount']);assert.equal(logged.expected,200000);assert.equal(logged.amount,1);
+});
