@@ -39,7 +39,7 @@ main = el('main', [
         ], className='package-content'),
         el('aside', [
             el('p', 'YOUR INVESTMENT', className='pricing-kicker'),
-            el('div', [el('span', '₦2,000', className='package-price'), el('span', 'NGN', className='currency-label')], className='price-line'),
+            el('div', [el('span', '₦450,000', className='package-price'), el('span', 'NGN', className='currency-label')], className='price-line'),
             el('p', 'For the complete five-video package.', className='price-caption'),
             el('div', [
                 el('a', [el('span', 'Start my retainer'), el('span','↗', **{'aria-hidden':'true'})], href='/checkout', className='pricing-cta'),
@@ -51,7 +51,7 @@ main = el('main', [
     el('section', [
         el('div', [el('p','A FEW THINGS TO KNOW',className='pricing-kicker'),el('h2','Before we hit play.')],className='pricing-notes-heading'),
         el('div', [
-            el('details', [el('summary','What’s the minimum package?'),el('p','Four short-form videos and one long-form video, for ₦2,000. One price, one package.')]),
+            el('details', [el('summary','What’s the minimum package?'),el('p','Four short-form videos and one long-form video, for ₦450,000. One price, one package.')]),
             el('details', [el('summary','What should I have ready?'),el('p','Your footage, an idea of what you want to make, and any references you love. Include your target platforms and preferred deadline so we can define the brief.')]),
             el('details', [el('summary','How do we decide the scope?'),el('p','We’ll agree on video lengths, the editing style, revisions, and the delivery timeline before work starts.')]),
         ],className='pricing-faq'),
@@ -59,7 +59,7 @@ main = el('main', [
     el('footer',[el('span','MULTIMUDIA'),el('span','Made to be watched.')],className='pricing-footer'),
 ], className='pricing-page')
 
-DESC='4 short videos and 1 long-form video. ₦2,000.'
+DESC='4 short videos and 1 long-form video. ₦450,000.'
 DESC_RE=r'(?:Pricing details coming soon\.|4 short videos and 1 long-form video\.[^"]*)'
 
 rsc_path=ROOT/'pricing.rsc'
