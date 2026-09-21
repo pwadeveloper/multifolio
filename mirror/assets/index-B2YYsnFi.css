@@ -11,6 +11,8 @@
 .section-head{margin-bottom:36px}
 .section-head h2{margin-top:12px}
 .section-lead{font-size:14px;line-height:1.7;color:var(--pricing-muted);margin-top:14px;max-width:54ch;text-wrap:pretty}
+.section-head-center{text-align:center;max-width:58ch;margin-left:auto;margin-right:auto}
+.section-head-center .section-lead{margin-left:auto;margin-right:auto}
 
 /* Buttons */
 .pricing-cta{display:flex;justify-content:space-between;align-items:center;gap:20px;width:100%;min-height:52px;padding:14px 18px;background:var(--pricing-ink);color:#fff;border-radius:8px;font-size:14px;font-weight:500;transition:background .15s,transform .15s}
@@ -29,45 +31,54 @@
 
 /* 01 Billing toggle */
 .bill-input{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.billing-toggle{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--pricing-line);border-radius:999px;background:var(--pricing-paper)}
-.billing-toggle label{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;border-radius:999px;font-size:13px;font-weight:500;color:var(--pricing-muted);cursor:pointer;transition:background .15s,color .15s}
+.billing-toggle{display:flex;width:fit-content;margin:0 auto;gap:4px;padding:4px;border:1px solid var(--pricing-line);border-radius:999px;background:var(--pricing-paper)}
+.billing-toggle label{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;font-size:13px;font-weight:500;color:var(--pricing-muted);cursor:pointer;transition:background .15s,color .15s}
 .toggle-save{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:999px;background:var(--pricing-accent);color:var(--pricing-accent-ink)}
-#bill-once:checked~.billing-toggle label[for=bill-once],#bill-month:checked~.billing-toggle label[for=bill-month]{background:var(--pricing-ink);color:#fff}
+#bill-once:checked~.billing-toggle label[for=bill-once],#bill-month:checked~.billing-toggle label[for=bill-month]{background:#fff;color:var(--pricing-ink);box-shadow:0 1px 2px #20231d1f}
 #bill-once:focus-visible~.billing-toggle label[for=bill-once],#bill-month:focus-visible~.billing-toggle label[for=bill-month]{outline:3px solid #8c9f60;outline-offset:3px}
-.billing-note{font-size:12px;line-height:1.7;color:var(--pricing-muted);margin-top:14px;max-width:58ch;text-wrap:pretty}
+.billing-note{font-size:12px;line-height:1.7;color:var(--pricing-muted);margin:16px auto 0;max-width:56ch;text-align:center;text-wrap:pretty}
 .when-once,.when-monthly{display:none}
 #bill-once:checked~.pricing-tiers .when-once,#bill-month:checked~.pricing-tiers .when-monthly{display:revert}
 
 /* 01 Tiers */
-.pricing-tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch;margin-top:32px}
-.tier{display:flex;flex-direction:column;border:1px solid var(--pricing-line);border-radius:18px;padding:28px 24px;background:#fff}
-.tier-featured{border-color:var(--pricing-ink);background:var(--pricing-paper);box-shadow:0 18px 40px -28px #20231d80}
-.tier-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.pricing-tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch;margin-top:40px}
+.tier{display:flex;flex-direction:column;border:1px solid var(--pricing-line);border-radius:20px;background:var(--pricing-paper);overflow:hidden}
+.tier-head{padding:26px 22px 22px}
+.tier-featured .tier-head{background:var(--pricing-ink);color:#fff}
+.tier-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:24px;margin-bottom:14px}
 .tier-name{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:.12em}
 .tier-badge{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:10px;letter-spacing:.08em;padding:4px 9px;border-radius:999px;background:var(--pricing-accent);color:var(--pricing-accent-ink)}
 .tier-term{margin-left:auto;font-size:11px;letter-spacing:.03em;color:var(--pricing-muted)}
-.tier-outcome{font-size:17px;font-weight:500;letter-spacing:-.025em;line-height:1.4;text-wrap:pretty;min-height:72px}
-.tier-prices{margin-top:22px;padding-top:22px;border-top:1px solid var(--pricing-line)}
-.tier-price-line{display:flex;align-items:baseline;gap:8px}
-.tier-prefix{font-size:13px;color:var(--pricing-muted)}
-.tier-amount{font-size:clamp(30px,3vw,38px);font-weight:500;letter-spacing:-.05em;line-height:1.05;font-variant-numeric:tabular-nums}
-.tier-unit{display:block;margin-top:9px;font-family:'IBM Plex Sans',Arial,sans-serif;font-size:11px;letter-spacing:.07em;color:var(--pricing-muted)}
-.tier-caption{font-size:13px;line-height:1.65;color:var(--pricing-muted);margin-top:12px;text-wrap:pretty}
-.tier-compare{font-size:12px;line-height:1.6;margin-top:12px;padding:9px 11px;border-radius:8px;background:var(--pricing-accent);color:var(--pricing-accent-ink);text-wrap:pretty}
-.tier-only-note{font-size:12px;line-height:1.6;margin-top:14px;padding:9px 11px;border-radius:8px;background:var(--pricing-accent);color:var(--pricing-accent-ink)}
-.tier .pricing-cta{margin-top:24px}
-.tier-note{font-size:11px;line-height:1.6;color:var(--pricing-muted);margin-top:12px;text-wrap:pretty}
-.tier-gets{margin-top:26px;padding-top:22px;border-top:1px solid var(--pricing-line)}
-.tier-gets-head{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--pricing-muted);margin-bottom:14px}
-.tier-list{display:flex;flex-direction:column;gap:10px}
-.tier-list li{position:relative;padding-left:20px;font-size:13px;line-height:1.6;text-wrap:pretty}
-.tier-list li:before{content:'';position:absolute;left:0;top:10px;width:9px;height:1px;background:#20231d80}
-.tier-specs{margin-top:26px;padding-top:22px;border-top:1px solid var(--pricing-line)}
+.tier-featured .tier-term{color:#ffffffa6}
+.tier-outcome{font-size:14px;line-height:1.6;color:var(--pricing-muted);text-wrap:pretty;min-height:67px}
+.tier-featured .tier-outcome{color:#ffffffc7}
+
+/* the inset panel: price + button, lifted off the card */
+.tier-panel{margin:0 14px;padding:20px 18px;background:#fff;border:1px solid var(--pricing-line);border-radius:14px}
+.tier-featured .tier-head{padding-bottom:8px}
+.tier-featured .tier-panel{margin-top:14px}
+.tier-price-line{display:flex;align-items:flex-start;gap:7px}
+.tier-prefix{font-size:12px;color:var(--pricing-muted);padding-top:9px}
+.tier-currency{font-size:17px;font-weight:500;line-height:1;padding-top:5px}
+.tier-amount{font-size:clamp(30px,3.1vw,40px);font-weight:500;letter-spacing:-.05em;line-height:1;font-variant-numeric:tabular-nums}
+.tier-unit{display:flex;flex-direction:column;padding-top:4px;font-family:'IBM Plex Sans',Arial,sans-serif;font-size:10px;line-height:1.4;letter-spacing:.06em;text-transform:uppercase;color:var(--pricing-muted)}
+.tier-caption{font-size:12.5px;line-height:1.6;color:var(--pricing-muted);margin-top:14px;text-wrap:pretty}
+.tier-compare{font-size:12px;line-height:1.55;margin-top:10px;padding:9px 11px;border-radius:8px;background:var(--pricing-accent);color:var(--pricing-accent-ink);text-wrap:pretty}
+.tier-only-note{font-size:12px;line-height:1.55;margin-top:12px;padding:9px 11px;border-radius:8px;background:var(--pricing-accent);color:var(--pricing-accent-ink)}
+.tier-panel .pricing-cta{justify-content:center;gap:10px;margin-top:18px;min-height:48px;border-radius:10px}
+.tier-note{font-size:11px;line-height:1.55;color:var(--pricing-muted);margin-top:12px;text-align:center;text-wrap:pretty}
+
+.tier-gets{margin:26px 22px 0;padding-top:22px;border-top:1px solid var(--pricing-line)}
+.tier-gets-head{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--pricing-muted);margin-bottom:16px}
+.tier-list{display:flex;flex-direction:column;gap:11px}
+.tier-list li{position:relative;padding-left:24px;font-size:13px;line-height:1.55;text-wrap:pretty}
+.tier-list li:before{content:'✓';position:absolute;left:0;top:0;font-size:12px;line-height:1.7;color:var(--pricing-accent-ink)}
+.tier-specs{margin:24px 22px 26px;padding-top:22px;border-top:1px solid var(--pricing-line)}
 .tier-specs dt{font-family:'IBM Plex Sans',Arial,sans-serif;font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--pricing-muted);margin-top:16px}
 .tier-specs dt:first-child{margin-top:0}
 .tier-specs dd{font-size:12.5px;line-height:1.6;margin-top:5px;text-wrap:pretty}
-.tiers-footnote{font-size:13px;line-height:1.7;color:var(--pricing-muted);margin-top:24px;text-wrap:pretty}
-@media(min-width:901px){.tier-featured{margin-top:-14px;padding-top:42px;padding-bottom:36px}}
+.tiers-footnote{font-size:13px;line-height:1.7;color:var(--pricing-muted);margin-top:28px;text-align:center;text-wrap:pretty}
+@media(min-width:901px){.tier-caption{min-height:60px}.tier-featured{margin-top:-16px}.tier-featured .tier-head{padding-top:42px}.tier-featured .tier-specs{margin-bottom:42px}}
 
 /* 02 Add-ons */
 .addons{border-top:1px solid var(--pricing-line)}

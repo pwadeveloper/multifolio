@@ -33,10 +33,10 @@ def render(node):
 def kicker(text):
     return el('p', text, className='pricing-kicker')
 
-def head(label, heading, lead=None):
+def head(label, heading, lead=None, center=False):
     parts = [kicker(label), el('h2', heading)]
     if lead: parts.append(el('p', lead, className='section-lead'))
-    return el('div', parts, className='section-head')
+    return el('div', parts, className='section-head' + (' section-head-center' if center else ''))
 
 def cta(label, href, className='pricing-cta', glyph='↗', **extra):
     return el('a', [el('span', label), el('span', glyph, **{'aria-hidden': 'true'})], href=href, className=className, **extra)
@@ -44,9 +44,11 @@ def cta(label, href, className='pricing-cta', glyph='↗', **extra):
 def book(label='Book a free 15-min call', className='pricing-cta'):
     return cta(label, BOOKING, className, target='_blank', rel='noopener noreferrer')
 
-def price(amount, unit, caption, variant=None, prefix=None, compare=None):
-    line = ([el('span', prefix, className='tier-prefix')] if prefix else []) + [el('span', amount, className='tier-amount')]
-    parts = [el('div', line, className='tier-price-line'), el('span', unit, className='tier-unit'), el('p', caption, className='tier-caption')]
+def price(amount, unit_top, unit_bottom, caption, variant=None, prefix=None, compare=None):
+    line = ([el('span', prefix, className='tier-prefix')] if prefix else [])
+    line += [el('span', '₦', className='tier-currency'), el('span', amount, className='tier-amount'),
+             el('span', [el('span', unit_top), el('span', unit_bottom)], className='tier-unit')]
+    parts = [el('div', line, className='tier-price-line'), el('p', caption, className='tier-caption')]
     if compare: parts.append(el('p', compare, className='tier-compare'))
     return el('div', parts, className='tier-price' + (f' {variant}' if variant else ''))
 
@@ -57,11 +59,11 @@ def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None,
     top = [el('span', name, className='tier-name')]
     if badge: top.append(el('span', badge, className='tier-badge'))
     top.append(el('span', term, className='tier-term'))
-    body = [el('div', top, className='tier-top'), el('p', outcome, className='tier-outcome'), el('div', prices, className='tier-prices')]
-    body += list(extra)
-    body += [action, el('p', note, className='tier-note'),
-             el('div', [el('p', 'You get', className='tier-gets-head'), el('ul', [el('li', item) for item in gets], className='tier-list')], className='tier-gets'),
-             specs(rows)]
+    panel = [el('div', prices, className='tier-prices')] + list(extra) + [action, el('p', note, className='tier-note')]
+    body = [el('div', [el('div', top, className='tier-top'), el('p', outcome, className='tier-outcome')], className='tier-head'),
+            el('div', panel, className='tier-panel'),
+            el('div', [el('p', 'You get', className='tier-gets-head'), el('ul', [el('li', item) for item in gets], className='tier-list')], className='tier-gets'),
+            specs(rows)]
     return el('article', body, className='tier tier-' + key + (' tier-featured' if badge else ''), **{'aria-label': name + ' package'})
 
 def turnaround(tier, metrics):
@@ -84,7 +86,7 @@ def faq(question, answer):
 STARTER = tier(
     'starter', 'STARTER', 'one-time',
     'See exactly what I do with your footage, before you commit to anything.',
-    [price('₦450,000', 'NGN · one-time', 'A complete five-video set, delivered and ready to post.')],
+    [price('450,000', 'NGN', 'one-time', 'A complete five-video set, delivered and ready to post.')],
     cta('Start with Starter', '/checkout', 'pricing-cta pricing-cta-secondary'),
     'One-time payment. No subscription, no auto-renewal.',
     ['4 short-form edits for Reels, Shorts and TikTok', '1 long-form edit', 'Burned-in captions on all shorts',
@@ -98,9 +100,9 @@ STARTER = tier(
 GROWTH = tier(
     'growth', 'GROWTH', 'monthly',
     'A full month of content, delivered on schedule, without you chasing anyone.',
-    [price('₦680,000', 'NGN · per month', 'Twelve videos a month, delivered on schedule, without you having to chase me for any of them.',
+    [price('680,000', 'NGN /', 'month', 'Twelve videos a month, delivered on schedule, without you having to chase me for any of them.',
            variant='when-monthly', compare='₦800,000 as a one-off — you save ₦120,000 a month on retainer.'),
-     price('₦800,000', 'NGN · one-time', 'The same twelve-video scope as a single project, with no ongoing commitment.',
+     price('800,000', 'NGN', 'one-time', 'The same twelve-video scope as a single project, with no ongoing commitment.',
            variant='when-once', compare='₦680,000 a month on retainer — 15% less for the same work.')],
     book(),
     'Monthly billing. Cancel with 30 days’ notice — no lock-in.',
@@ -116,10 +118,10 @@ GROWTH = tier(
 STUDIO = tier(
     'studio', 'STUDIO', 'shoot + edit',
     'I come to you, film it properly, and turn it into a story worth keeping.',
-    [price('₦2,125,000', 'NGN · per month · excludes travel', 'One shoot day and a full edit package every month, filmed and cut by me and a small crew.',
+    [price('2,125,000', 'NGN /', 'month', 'Excludes travel. One shoot day and a full edit package every month, filmed and cut by me and a small crew.',
            variant='when-monthly', prefix='from', compare='Saves ₦375,000 against booking each production separately.'),
-     price('₦2,500,000', 'NGN · per production · excludes travel', 'A directed shoot and a finished film, plus a month of social cutdowns from the same footage.',
-           variant='when-once', prefix='from', compare='From ₦2,125,000 a month if you film with us regularly.')],
+     price('2,500,000', 'NGN /', 'production', 'Excludes travel. A directed shoot and a finished film, plus a month of social cutdowns from the same footage.',
+           variant='when-once', prefix='from', compare='From ₦2,125,000 a month if you film with me regularly.')],
     book(className='pricing-cta pricing-cta-secondary'),
     'Price excludes travel cost. Travel, accommodation and permits are quoted separately and approved by you before I book anything.',
     ['1–2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling — I find the story on the day',
@@ -144,7 +146,7 @@ main = el('main', [
 
 
   el('section', [
-    head('01 / PACKAGES', 'Pick the rhythm you need.', 'Every package starts with a call and a written scope. Nothing begins until you approve it.'),
+    head('01 / PACKAGES', 'Pick the rhythm you need.', 'Every package starts with a call and a written scope. Nothing begins until you approve it.', center=True),
     el('input', type='radio', name='billing', id='bill-once', className='bill-input', **{'aria-describedby': 'billing-note'}),
     el('input', type='radio', name='billing', id='bill-month', className='bill-input', defaultChecked=True, **{'aria-describedby': 'billing-note'}),
     el('div', [
