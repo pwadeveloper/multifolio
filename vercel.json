@@ -4,7 +4,10 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": true,
-  "redirects": [{"source":"/","destination":"/design","permanent":false}],
+  "redirects": [
+    {"source":"/","destination":"/work","permanent":false},
+    {"source":"/design","destination":"/work","permanent":false}
+  ],
   "rewrites": [{"source":"/gtag/js","destination":"/gtag-stub.js"}],
   "headers": [
     {"source":"/(.*)","headers":[{"key":"X-Content-Type-Options","value":"nosniff"},{"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"}]},
