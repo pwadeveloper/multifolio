@@ -79,7 +79,6 @@ width:100%;max-width:1160px;margin:0 auto;padding:var(--s6) var(--s5) var(--s3);
 .tier-specs dt{font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:var(--fw-medium);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--muted);margin-top:var(--s2)}
 .tier-specs dt:first-child{margin-top:0}
 .tier-specs dd{font-size:var(--fs-sm);line-height:var(--lh-body);margin-top:4px;text-wrap:pretty}
-.tiers-footnote{font-size:var(--fs-sm);line-height:var(--lh-body);color:var(--muted);margin-top:var(--s4);text-align:center;text-wrap:pretty}
 @media(min-width:901px){.tier-caption{min-height:62px}.tier-outcome{min-height:65px}.tier-note{min-height:32px}}
 
 /* Add-ons */
