@@ -99,10 +99,10 @@ def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None,
     return el('article', [el('div', head_parts, className='tier-head'), el('div', body, className='tier-body')],
               className='tier tier-' + key + (' tier-featured' if badge else ''), **{'aria-label': label + ' package'})
 
-def band(heading, description, price_line, action, gets, rows, note):
+def band(label, heading, description, price_line, action, gets, rows, note):
     hidden = [el('p', 'You get', className='tier-gets-head'), el('ul', [get_item(i) for i in gets], className='tier-list'), specs(rows), el('p', note, className='band-note')]
     return el('section', [
-        el('div', [el('h3', heading), el('p', description, className='band-description'), el('p', price_line, className='band-price')], className='band-main'),
+        el('div', [kicker(label), el('h3', heading), el('p', description, className='band-description'), el('p', price_line, className='band-price')], className='band-main'),
         el('div', [action, more_button('more-studio', 'See what’s included')], className='band-actions'),
         panel('more-studio', hidden),
     ], className='studio-band', **{'aria-label': 'Studio production'})
@@ -127,32 +127,31 @@ def faq(question, answer):
 
 STARTER = tier(
     'starter', 'STARTER', 'one-time',
-    'A complete five-video set, delivered and ready to post.',
-    [price('450,000', 'NGN / one-time', per='≈ ₦90,000 per video')],
+    'See exactly what I do with your footage, before you commit to anything.',
+    [price('450,000', 'NGN / one-time', 'A complete five-video set, delivered and ready to post.', per='≈ ₦90,000 per video')],
     cta('Start with Starter', '/checkout', 'pricing-cta pricing-cta-secondary'),
-    'One-time payment. No subscription, no auto-renewal.',
+    'One-time payment, no subscription. Upgrade to a Growth season within 14 days and your Starter fee is credited toward month one.',
     ['4 short-form edits for Reels, Shorts and TikTok', '1 long-form edit', 'Burned-in captions on all shorts',
      'Colour and sound pass on every video', 'Platform-correct exports, named and organised'],
     [('Lengths', 'Shorts 15–90s (9:16) · Long-form up to 20 minutes (16:9)'),
      ('Revisions', '2 rounds per video'),
      ('Turnaround', 'First cuts in 7 working days, everything by day 10'),
-     ('Best for', 'First-time clients who want proof before committing to a season.')],
-    extra=[el('p', 'No commitment. Upgrade to a Growth season within 14 days and your Starter fee is credited toward month one.', className='tier-only-note when-monthly')])
+     ('Best for', 'First-time clients who want proof before committing to a season.')])
 
 GROWTH = tier(
     'growth', 'GROWTH', ('single project', '3-month season'),
     ('Twelve videos, one project, no ongoing commitment.',
-     'Twelve videos every month for three months, delivered on schedule, without you having to chase me for any of them.'),
-    [price('680,000', 'NGN / month · 3-month season',
+     'A full month of content, delivered on schedule, without you chasing anyone.'),
+    [price('680,000', 'NGN / month · 3-month season', 'Twelve videos every month for three months, delivered on schedule, without you having to chase me for any of them.',
            variant='when-monthly', per='≈ ₦57,000 per video'),
      price('800,000', 'NGN / one-time', 'A full batch of 12 videos — 10 short-form and 2 long-form — scoped, edited and delivered as one project.',
            variant='when-once', per='≈ ₦67,000 per video')],
     book(),
     ('One-time payment. No subscription, no auto-renewal.',
-     'Billed monthly across a 3-month season. Nothing auto-renewal'),
+     'Billed monthly across a 3-month season. Nothing auto-renews — at the end, you decide if there’s a season two.'),
     ['10 short-form edits a month', '2 long-form edits a month',
      'Burned-in captions plus .srt subtitle files', 'Subtitles in 1 extra language: Hausa, Yoruba, Igbo or Pidgin',
-     '2 custom thumbnails per long-form video',
+     '2 custom thumbnails per long-form video', 'First cut in 5 working days',
      ('12 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
      'Priority turnaround, ahead of one-off projects', 'A 30-minute check-in call each month'],
     [('Lengths', 'Shorts 15s–5 minutes (9:16) · Long-form up to 35 minutes (16:9)'),
@@ -160,13 +159,14 @@ GROWTH = tier(
      ('Turnaround', 'First cut within 5 working days · revisions back within 48 hours'),
      ('Best for', ('Brands with a campaign, launch or backlog to clear in one go.',
                    'Founders, brands and creators posting every week.'))],
-    badge='MOST POPULAR',
+    badge='MOST POPULAR', visible=6,
     compares=compare_box('₦680,000 a month inside a 3-month season — 15% less for the same work.',
                          '₦800,000 as a one-off — you save ₦360,000 across the season.'))
 
 STUDIO = band(
+    'STUDIO · SHOOT + EDIT',
     'Studio — I come to you and film it',
-    'Excludes travel. Up to two directed shoot days at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage.',
+    'Excludes travel. Up to two directed shoot days at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage. In a season, that’s up to two shoot days, a hero film and 8 cutdowns every month for three months.',
     'from ₦2,500,000 per production · or ₦2,125,000 a month in a 3-month season',
     book(className='pricing-cta pricing-cta-secondary band-cta'),
     ['Up to 2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling — I find the story on the day',
