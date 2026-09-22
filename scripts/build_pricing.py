@@ -44,13 +44,13 @@ def cta(label, href, className='pricing-cta', glyph='↗', **extra):
 def book(label='Book a free 15-min call', className='pricing-cta'):
     return cta(label, BOOKING, className, target='_blank', rel='noopener noreferrer')
 
-def price(amount, unit, caption, variant=None, prefix=None, compare=None, per=None):
+def price(amount, unit, caption=None, variant=None, prefix=None, compare=None, per=None):
     line = ([el('span', prefix, className='tier-prefix')] if prefix else [])
     line += [el('span', '₦', className='tier-currency'), el('span', amount, className='tier-amount'),
              el('span', unit, className='tier-unit')]
     parts = [el('div', line, className='tier-price-line')]
     if per: parts.append(el('p', per, className='tier-per'))
-    parts.append(el('p', caption, className='tier-caption'))
+    if caption: parts.append(el('p', caption, className='tier-caption'))
     if compare: parts.append(el('p', compare, className='tier-compare'))
     return el('div', parts, className='tier-price' + (f' {variant}' if variant else ''))
 
@@ -99,8 +99,8 @@ def faq(question, answer):
 
 STARTER = tier(
     'starter', 'STARTER', 'one-time',
-    'See exactly what I do with your footage, before you commit to anything.',
-    [price('450,000', 'NGN / one-time', 'A complete five-video set, delivered and ready to post.', per='≈ ₦90,000 per video')],
+    'A complete five-video set, delivered and ready to post.',
+    [price('450,000', 'NGN / one-time', per='≈ ₦90,000 per video')],
     cta('Start with Starter', '/checkout', 'pricing-cta pricing-cta-secondary'),
     'One-time payment. No subscription, no auto-renewal.',
     ['4 short-form edits for Reels, Shorts and TikTok', '1 long-form edit', 'Burned-in captions on all shorts',
@@ -114,14 +114,14 @@ STARTER = tier(
 GROWTH = tier(
     'growth', 'GROWTH', ('single project', '3-month season'),
     ('Twelve videos, one project, no ongoing commitment.',
-     'A full month of content, delivered on schedule, without you chasing anyone.'),
-    [price('680,000', 'NGN / month · 3-month season', 'Twelve videos every month for three months, delivered on schedule, without you having to chase me for any of them.',
+     'Twelve videos every month for three months, delivered on schedule, without you having to chase me for any of them.'),
+    [price('680,000', 'NGN / month · 3-month season',
            variant='when-monthly', per='≈ ₦57,000 per video', compare='₦800,000 as a one-off — you save ₦360,000 across the season.'),
      price('800,000', 'NGN / one-time', 'A full batch of 12 videos — 10 short-form and 2 long-form — scoped, edited and delivered as one project.',
            variant='when-once', per='≈ ₦67,000 per video', compare='₦680,000 a month inside a 3-month season — 15% less for the same work.')],
     book(),
     ('One-time payment. No subscription, no auto-renewal.',
-     'Billed monthly across a 3-month season. Nothing auto-renews — at the end, you decide if there’s a season two.'),
+     'Billed monthly across a 3-month season. Nothing auto-renewal'),
     ['10 short-form edits a month', '2 long-form edits a month',
      ('12 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
      'Burned-in captions plus .srt subtitle files', 'Subtitles in 1 extra language: Hausa, Yoruba, Igbo or Pidgin',
@@ -135,16 +135,16 @@ GROWTH = tier(
 
 STUDIO = tier(
     'studio', ('STUDIO ONE', 'STUDIO'), ('one-time · shoot + edit', '3-month season'),
-    ('One shoot day. One finished film. Plus a month of cutdowns.',
-     'A shoot day at your place every month, turned into a film and a month of content.'),
-    [price('2,125,000', 'NGN / month · 3-month season', 'Excludes travel. Every month: one directed shoot day at your location, one hero film, and 8 short-form cutdowns from the same footage.',
+    ('Up to two shoot days. One finished film. Plus a month of cutdowns.',
+     'Up to two shoot days at your place every month, turned into a film and a month of content.'),
+    [price('2,125,000', 'NGN / month · 3-month season', 'Excludes travel. Every month: up to two directed shoot days at your location, one hero film, and 8 short-form cutdowns from the same footage.',
            variant='when-monthly', prefix='from', compare='₦2,500,000 as a single production — you save ₦1,125,000 across the season.'),
-     price('2,500,000', 'NGN / production', 'Excludes travel. A directed shoot day at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage.',
-           variant='when-once', prefix='from', compare='Run a shoot day every month inside a 3-month season and save ₦375,000 a month.')],
+     price('2,500,000', 'NGN / production', 'Excludes travel. Up to two directed shoot days at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage.',
+           variant='when-once', prefix='from', compare='Run shoot days every month inside a 3-month season and save ₦375,000 a month.')],
     book(className='pricing-cta pricing-cta-secondary'),
     ('Price excludes travel cost. Travel, accommodation and permits are quoted separately and approved by you before I book anything.',
-     'Billed monthly across a 3-month season. Nothing auto-renews — at the end, you decide if there’s a season two.'),
-    ['1–2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling — I find the story on the day',
+     'Billed monthly across a 3-month season. Nothing auto-renewal'),
+    ['Up to 2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling — I find the story on the day',
      '1 hero film, fully graded and sound-mixed', '8 short-form cutdowns from the same shoot',
      'Licensed music and a full caption and subtitle package', 'Thumbnail pack for the hero film',
      'A 60-minute strategy call before I roll', 'Your raw footage, organised and handed over'],
