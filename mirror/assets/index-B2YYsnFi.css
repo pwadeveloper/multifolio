@@ -105,18 +105,6 @@ width:100%;max-width:1160px;margin:0 auto;padding:var(--s6) var(--s5) var(--s3);
 .pricing-guarantee .section-head{margin-bottom:0}
 .pricing-guarantee .section-lead{max-width:60ch}
 
-/* Proof */
-.proof-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s3)}
-.proof-card{display:flex;flex-direction:column;gap:var(--s3);padding:var(--s3);background:#fff;border:1px solid var(--line);border-radius:16px}
-.proof-quote{font-size:var(--fs-base);line-height:var(--lh-snug);color:var(--ink);margin:0;text-wrap:pretty}
-.proof-attr{margin-top:auto}
-.proof-name{display:block;font-family:'IBM Plex Sans',Arial,sans-serif;font-size:var(--fs-sm);font-weight:600;letter-spacing:.02em;color:var(--ink)}
-.proof-role{display:block;font-size:var(--fs-sm);color:var(--ink-soft);margin-top:2px}
-.proof-org{display:block;font-size:var(--fs-sm);color:var(--muted)}
-.proof-logos{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2);margin-top:var(--s5)}
-.proof-logo{display:grid;place-items:center;min-width:120px;height:56px;padding:0 var(--s3);border:1px dashed #20231d40;border-radius:10px;font-family:'IBM Plex Sans',Arial,sans-serif;font-size:var(--fs-label);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--muted);text-align:center}
-.proof-link{display:inline-flex;align-items:center;gap:6px;width:auto;margin-top:var(--s4);font-size:var(--fs-sm);font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
-
 /* Process */
 .process{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--s3)}
 .step{border-top:1px solid var(--ink);padding-top:var(--s2)}
@@ -153,7 +141,6 @@ width:100%;max-width:1160px;margin:0 auto;padding:var(--s6) var(--s5) var(--s3);
 .tier-featured{order:-1}
 .process{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s4) var(--s3)}
 .pricing-notes{grid-template-columns:1fr;gap:var(--s4)}
-.proof-grid{grid-template-columns:1fr;gap:var(--s4)}
 }
 @media(max-width:620px){
 .pricing-page{padding:var(--s4) var(--s2) var(--s3)}

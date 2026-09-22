@@ -84,12 +84,6 @@ def step(number, title, body):
 def faq(question, answer):
     return el('details', [el('summary', question), el('p', answer)])
 
-def proof_card(quote, name, role, org):
-    return el('figure', [
-        el('blockquote', quote, className='proof-quote'),
-        el('figcaption', [el('span', name, className='proof-name'), el('span', role, className='proof-role'), el('span', org, className='proof-org')], className='proof-attr'),
-    ], className='proof-card')
-
 # --- page ------------------------------------------------------------------
 
 STARTER = tier(
@@ -174,18 +168,7 @@ main = el('main', [
   ], className='pricing-section pricing-guarantee', id='guarantee'),
 
   el('section', [
-    head('03 / PROOF', 'Who I’ve made this for.'),
-    el('div', [
-      proof_card('[LIKE THIS — a one or two line quote about the work]', '[LIKE THIS — client name]', '[LIKE THIS — role or title]', '[LIKE THIS — organisation]'),
-      proof_card('[LIKE THIS — a one or two line quote about the work]', '[LIKE THIS — client name]', '[LIKE THIS — role or title]', '[LIKE THIS — organisation]'),
-      proof_card('[LIKE THIS — a one or two line quote about the work]', '[LIKE THIS — client name]', '[LIKE THIS — role or title]', '[LIKE THIS — organisation]'),
-    ], className='proof-grid'),
-    el('div', [el('span', '[LIKE THIS — client logo]', className='proof-logo') for _ in range(5)], className='proof-logos'),
-    cta('See Selected Work', '/selected-work', 'proof-link'),
-  ], className='pricing-section pricing-proof', id='proof'),
-
-  el('section', [
-    head('04 / ADD-ONS', 'Bolt any of these onto any package.'),
+    head('03 / ADD-ONS', 'Bolt any of these onto any package.'),
     el('div', [
       addon('Extra short-form edit', 'Same style, same turnaround as the rest of your batch.', '₦55,000 each · ₦47,000 in a season'),
       addon('Extra long-form edit', 'Beyond what your package already includes.', '₦125,000 each · ₦106,000 in a season'),
@@ -195,17 +178,17 @@ main = el('main', [
   ], className='pricing-section', id='add-ons'),
 
   el('section', [
-    head('05 / TURNAROUND', 'How fast you get your videos.'),
+    head('04 / TURNAROUND', 'How fast you get your videos.'),
     el('div', [
       turnaround('STARTER', [('7', 'working days', 'to your first cut'), ('10', 'working days', 'to everything delivered')]),
-      turnaround('GROWTH', [('5', 'working days', 'to your first cut'), ('[FILL: __]', 'working days', 'to everything delivered')]),
-      turnaround('STUDIO', [('10', 'working days', 'to your first cut, after wrap'), ('[FILL: __]', 'working days', 'to everything delivered, after wrap')], note='Shoot booked within 3 weeks.'),
+      turnaround('GROWTH', [('5', 'working days', 'to your first cut'), ('14', 'working days', 'to everything delivered')]),
+      turnaround('STUDIO', [('10', 'working days', 'to your first cut, after wrap'), ('20', 'working days', 'to everything delivered, after wrap')], note='Shoot booked within 3 weeks.'),
     ], className='turnaround'),
     el('p', 'The clock starts when your footage and brief are both in — not before.', className='turnaround-note'),
   ], className='pricing-section', id='turnaround'),
 
   el('section', [
-    head('06 / HOW IT WORKS', 'Four steps, start to posted.'),
+    head('05 / HOW IT WORKS', 'Four steps, start to posted.'),
     el('ol', [
       step('01', 'Book a call', 'Fifteen minutes. I learn what you are making, who it is for, and what is currently in the way.'),
       step('02', 'Brief & scope', 'You get it in writing: deliverables, lengths, revision rounds, dates, price. Nothing starts until you approve it.'),
@@ -218,11 +201,11 @@ main = el('main', [
 
 
   el('section', [
-    el('div', [kicker('07 / QUESTIONS'), el('h2', 'Before we hit play.')], className='pricing-notes-heading'),
+    el('div', [kicker('06 / QUESTIONS'), el('h2', 'Before we hit play.')], className='pricing-notes-heading'),
     el('div', [
       faq('What footage do you need from me?', 'Whatever you have — phone, camera, screen recordings. Send the highest quality version you have, unedited, via Google Drive, WeTransfer or a shared folder. I will tell you on the call if there is a gap, before you pay anything.'),
       faq('What if I have no footage at all?', 'Then Starter and Growth are not for you yet — Studio is. I come and film it. If a full production is more than you need right now, book the call anyway and I will map out the cheapest way to get usable footage, even if that is you and a phone on a tripod.'),
-      faq('How do I pay?', 'Starter: 70% to start and 30% on delivery, or pay in full online by card or transfer. Growth: billed monthly, on the same date each month. Studio: 70% before the shoot, 30% on final delivery. Bank transfer and card both work. Invoices and receipts for organisations and agencies, and I can work with your procurement process.'),
+      faq('How do I pay?', [el('strong', 'Starter:'), ' Full payment immediately. ', el('strong', 'Growth:'), ' billed monthly, on the same date each month. ', el('strong', 'Studio:'), ' 70% before the shoot, 30% on final delivery. Bank transfer and card both work. Invoices and receipts for organisations and agencies, and I can work with your procurement process.']),
       faq('How many revisions do I get?', 'Starter 2 rounds per video, Growth 3, Studio 3 on the hero film and 2 per cutdown. A round is one consolidated set of notes. And if the first cut misses the approved brief, I recut it free and that round does not count against your total.'),
       faq('Who owns the final files?', 'Client reserves the right to all agreed upon deliverables.'),
       faq('Is there a minimum commitment?', 'Growth and Studio run in 3-month seasons, because content compounds: your audience and the algorithm need about 90 days of consistent posting before the results show. You’re billed monthly, and nothing renews automatically — at the end of the season, you choose whether to continue. And if month one misses the brief we agreed in writing, you can end the season there and owe nothing more. Starter is always one-time, with no commitment at all.'),
