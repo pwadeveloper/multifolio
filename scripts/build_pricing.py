@@ -44,11 +44,13 @@ def cta(label, href, className='pricing-cta', glyph='↗', **extra):
 def book(label='Book a free 15-min call', className='pricing-cta'):
     return cta(label, BOOKING, className, target='_blank', rel='noopener noreferrer')
 
-def price(amount, unit, caption, variant=None, prefix=None, compare=None):
+def price(amount, unit, caption, variant=None, prefix=None, compare=None, per=None):
     line = ([el('span', prefix, className='tier-prefix')] if prefix else [])
     line += [el('span', '₦', className='tier-currency'), el('span', amount, className='tier-amount'),
              el('span', unit, className='tier-unit')]
-    parts = [el('div', line, className='tier-price-line'), el('p', caption, className='tier-caption')]
+    parts = [el('div', line, className='tier-price-line')]
+    if per: parts.append(el('p', per, className='tier-per'))
+    parts.append(el('p', caption, className='tier-caption'))
     if compare: parts.append(el('p', compare, className='tier-compare'))
     return el('div', parts, className='tier-price' + (f' {variant}' if variant else ''))
 
@@ -66,10 +68,11 @@ def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None,
                        specs(rows)], className='tier-body')]
     return el('article', body, className='tier tier-' + key + (' tier-featured' if badge else ''), **{'aria-label': name + ' package'})
 
-def turnaround(tier, metrics):
+def turnaround(tier, metrics, note=None):
     cols = [el('span', tier, className='turnaround-tier')]
     for number, unit, label in metrics:
         cols.append(el('div', [el('span', number, className='turnaround-number'), el('span', unit, className='turnaround-unit'), el('p', label, className='turnaround-label')], className='turnaround-metric'))
+    if note: cols.append(el('p', note, className='turnaround-col-note'))
     return el('div', cols, className='turnaround-col')
 
 def addon(name, detail, cost):
@@ -81,12 +84,18 @@ def step(number, title, body):
 def faq(question, answer):
     return el('details', [el('summary', question), el('p', answer)])
 
+def proof_card(quote, name, role, org):
+    return el('figure', [
+        el('blockquote', quote, className='proof-quote'),
+        el('figcaption', [el('span', name, className='proof-name'), el('span', role, className='proof-role'), el('span', org, className='proof-org')], className='proof-attr'),
+    ], className='proof-card')
+
 # --- page ------------------------------------------------------------------
 
 STARTER = tier(
     'starter', 'STARTER', 'one-time',
     'See exactly what I do with your footage, before you commit to anything.',
-    [price('450,000', 'NGN / one-time', 'A complete five-video set, delivered and ready to post.')],
+    [price('450,000', 'NGN / one-time', 'A complete five-video set, delivered and ready to post.', per='≈ ₦90,000 per video')],
     cta('Start with Starter', '/checkout', 'pricing-cta pricing-cta-secondary'),
     'One-time payment. No subscription, no auto-renewal.',
     ['4 short-form edits for Reels, Shorts and TikTok', '1 long-form edit', 'Burned-in captions on all shorts',
@@ -94,18 +103,18 @@ STARTER = tier(
     [('Lengths', 'Shorts 15–90s (9:16) · Long-form up to 20 minutes (16:9)'),
      ('Revisions', '2 rounds per video'),
      ('Turnaround', 'First cuts in 7 working days, everything by day 10'),
-     ('Best for', 'First-time clients who want proof before a retainer.')],
-    extra=[el('p', 'Starter is always one-time — it’s the no-commitment way in.', className='tier-only-note when-monthly')])
+     ('Best for', 'First-time clients who want proof before committing to a season.')],
+    extra=[el('p', 'No commitment. Upgrade to a Growth season within 14 days and your Starter fee is credited toward month one.', className='tier-only-note when-monthly')])
 
 GROWTH = tier(
-    'growth', 'GROWTH', 'monthly',
+    'growth', 'GROWTH', '3-month season',
     'A full month of content, delivered on schedule, without you chasing anyone.',
-    [price('680,000', 'NGN / month', 'Twelve videos a month, delivered on schedule, without you having to chase me for any of them.',
-           variant='when-monthly', compare='₦800,000 as a one-off — you save ₦120,000 a month on retainer.'),
+    [price('680,000', 'NGN / month · 3-month season', 'Twelve videos a month, delivered on schedule, without you having to chase me for any of them.',
+           variant='when-monthly', per='≈ ₦57,000 per video', compare='₦800,000 as a one-off — you save ₦360,000 across the season.'),
      price('800,000', 'NGN / one-time', 'The same twelve-video scope as a single project, with no ongoing commitment.',
-           variant='when-once', compare='₦680,000 a month on retainer — 15% less for the same work.')],
+           variant='when-once', compare='₦680,000 a month inside a 3-month season — 15% less for the same work.')],
     book(),
-    'Monthly billing. Cancel with 30 days’ notice — no lock-in.',
+    'Billed monthly across a 3-month season. Nothing auto-renews — at the end, you decide if there’s a season two.',
     ['10 short-form edits a month', '2 long-form edits a month',
      'Burned-in captions plus .srt subtitle files', 'Subtitles in 1 extra language: Hausa, Yoruba, Igbo or Pidgin',
      '2 custom thumbnails per long-form video', 'Priority turnaround, ahead of one-off projects', 'A 30-minute check-in call each month'],
@@ -120,8 +129,8 @@ STUDIO = tier(
     'I come to you, film it properly, and turn it into a story worth keeping.',
     [price('2,125,000', 'NGN / month', 'Excludes travel. One shoot day and a full edit package every month, filmed and cut by me and a small crew.',
            variant='when-monthly', prefix='from', compare='Saves ₦375,000 against booking each production separately.'),
-     price('2,500,000', 'NGN / production', 'Excludes travel. A directed shoot and a finished film, plus a month of social cutdowns from the same footage.',
-           variant='when-once', prefix='from', compare='From ₦2,125,000 a month if you film with me regularly.')],
+     price('2,500,000', 'NGN / production · or per month in a season', 'Excludes travel. A directed shoot and a finished film, plus a month of social cutdowns from the same footage.',
+           variant='when-once', prefix='from', compare='Book a single production, or save ₦375,000 a month inside a 3-month season.')],
     book(className='pricing-cta pricing-cta-secondary'),
     'Price excludes travel cost. Travel, accommodation and permits are quoted separately and approved by you before I book anything.',
     ['1–2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling — I find the story on the day',
@@ -151,36 +160,52 @@ main = el('main', [
     el('input', type='radio', name='billing', id='bill-month', className='bill-input', defaultChecked=True, **{'aria-describedby': 'billing-note'}),
     el('div', [
       el('label', 'One-time', htmlFor='bill-once'),
-      el('label', ['Monthly', el('span', 'save 15%', className='toggle-save')], htmlFor='bill-month'),
+      el('label', ['Season · 3 months', el('span', 'save 15%', className='toggle-save')], htmlFor='bill-month'),
     ], className='billing-toggle'),
-    el('p', 'The same scope costs 15% less on a monthly retainer than it does as one-off projects. Starter is always one-time.', className='billing-note', id='billing-note'),
+    el('p', 'The same scope costs 15% less inside a 3-month season than it does as one-off projects. Starter is always one-time.', className='billing-note', id='billing-note'),
     el('div', [STARTER, GROWTH, STUDIO], className='pricing-tiers'),
-    el('p', 'Not sure which fits? Book the call — I’ll tell you honestly, even if the answer is Starter.', className='tiers-footnote'),
+    el('p', 'I take on 5 new Growth clients a month. Next opening: [FILL: MONTH]. Not sure which fits? Book the call — I’ll tell you honestly, even if the answer is Starter.', className='tiers-footnote'),
   ], className='pricing-section pricing-section-packages', id='packages'),
 
 
   el('section', [
-    head('02 / ADD-ONS', 'Bolt any of these onto any package.'),
+    head('02 / GUARANTEE', 'Month one is on me to get right.',
+         'Every season starts with a written brief. If month one misses that brief, you can end the season there and owe nothing more.'),
+  ], className='pricing-section pricing-guarantee', id='guarantee'),
+
+  el('section', [
+    head('03 / PROOF', 'Who I’ve made this for.'),
     el('div', [
-      addon('Extra short-form edit', 'Same style, same turnaround as the rest of your batch.', '₦80,000 each · ₦65,000 on a retainer'),
-      addon('Extra long-form edit', 'Beyond what your package already includes.', '₦180,000 each'),
+      proof_card('[LIKE THIS — a one or two line quote about the work]', '[LIKE THIS — client name]', '[LIKE THIS — role or title]', '[LIKE THIS — organisation]'),
+      proof_card('[LIKE THIS — a one or two line quote about the work]', '[LIKE THIS — client name]', '[LIKE THIS — role or title]', '[LIKE THIS — organisation]'),
+      proof_card('[LIKE THIS — a one or two line quote about the work]', '[LIKE THIS — client name]', '[LIKE THIS — role or title]', '[LIKE THIS — organisation]'),
+    ], className='proof-grid'),
+    el('div', [el('span', '[LIKE THIS — client logo]', className='proof-logo') for _ in range(5)], className='proof-logos'),
+    cta('See Selected Work', '/selected-work', 'proof-link'),
+  ], className='pricing-section pricing-proof', id='proof'),
+
+  el('section', [
+    head('04 / ADD-ONS', 'Bolt any of these onto any package.'),
+    el('div', [
+      addon('Extra short-form edit', 'Same style, same turnaround as the rest of your batch.', '₦55,000 each · ₦47,000 in a season'),
+      addon('Extra long-form edit', 'Beyond what your package already includes.', '₦125,000 each · ₦106,000 in a season'),
       addon('Rush 48-hour delivery', 'Subject to availability — I will tell you before you pay.', '+35% of the project fee'),
     ], className='addons'),
-    el('p', 'Add-ons are quoted and approved before I start them. Nothing reaches an invoice you have not seen first.', className='addons-note'),
+    el('p', 'Add-ons build on a brief and editing style we’ve already set up, so each one costs less than starting fresh. Quoted and approved before I start them. Nothing reaches an invoice you have not seen first.', className='addons-note'),
   ], className='pricing-section', id='add-ons'),
 
   el('section', [
-    head('03 / TURNAROUND', 'How fast you get your videos.'),
+    head('05 / TURNAROUND', 'How fast you get your videos.'),
     el('div', [
-      turnaround('STARTER', [('7', 'working days', 'to your first cuts'), ('10', 'working days', 'to everything delivered')]),
-      turnaround('GROWTH', [('5', 'working days', 'to your first cut'), ('48', 'hours', 'to revisions coming back')]),
-      turnaround('STUDIO', [('3', 'weeks', 'to your shoot date'), ('10', 'working days', 'to first cut after wrap')]),
+      turnaround('STARTER', [('7', 'working days', 'to your first cut'), ('10', 'working days', 'to everything delivered')]),
+      turnaround('GROWTH', [('5', 'working days', 'to your first cut'), ('[FILL: __]', 'working days', 'to everything delivered')]),
+      turnaround('STUDIO', [('10', 'working days', 'to your first cut, after wrap'), ('[FILL: __]', 'working days', 'to everything delivered, after wrap')], note='Shoot booked within 3 weeks.'),
     ], className='turnaround'),
     el('p', 'The clock starts when your footage and brief are both in — not before.', className='turnaround-note'),
   ], className='pricing-section', id='turnaround'),
 
   el('section', [
-    head('04 / HOW IT WORKS', 'Four steps, start to posted.'),
+    head('06 / HOW IT WORKS', 'Four steps, start to posted.'),
     el('ol', [
       step('01', 'Book a call', 'Fifteen minutes. I learn what you are making, who it is for, and what is currently in the way.'),
       step('02', 'Brief & scope', 'You get it in writing: deliverables, lengths, revision rounds, dates, price. Nothing starts until you approve it.'),
@@ -193,14 +218,14 @@ main = el('main', [
 
 
   el('section', [
-    el('div', [kicker('05 / QUESTIONS'), el('h2', 'Before we hit play.')], className='pricing-notes-heading'),
+    el('div', [kicker('07 / QUESTIONS'), el('h2', 'Before we hit play.')], className='pricing-notes-heading'),
     el('div', [
       faq('What footage do you need from me?', 'Whatever you have — phone, camera, screen recordings. Send the highest quality version you have, unedited, via Google Drive, WeTransfer or a shared folder. I will tell you on the call if there is a gap, before you pay anything.'),
       faq('What if I have no footage at all?', 'Then Starter and Growth are not for you yet — Studio is. I come and film it. If a full production is more than you need right now, book the call anyway and I will map out the cheapest way to get usable footage, even if that is you and a phone on a tripod.'),
       faq('How do I pay?', 'Starter: 70% to start and 30% on delivery, or pay in full online by card or transfer. Growth: billed monthly, on the same date each month. Studio: 70% before the shoot, 30% on final delivery. Bank transfer and card both work. Invoices and receipts for organisations and agencies, and I can work with your procurement process.'),
       faq('How many revisions do I get?', 'Starter 2 rounds per video, Growth 3, Studio 3 on the hero film and 2 per cutdown. A round is one consolidated set of notes. And if the first cut misses the approved brief, I recut it free and that round does not count against your total.'),
       faq('Who owns the final files?', 'Client reserves the right to all agreed upon deliverables.'),
-      faq('Can I cancel a retainer?', 'Yes. 30 days’ notice, any month, no exit fee. You keep everything delivered and paid for up to that point. There is no lock-in contract — the work should be the reason you stay.'),
+      faq('Is there a minimum commitment?', 'Growth and Studio run in 3-month seasons, because content compounds: your audience and the algorithm need about 90 days of consistent posting before the results show. You’re billed monthly, and nothing renews automatically — at the end of the season, you choose whether to continue. And if month one misses the brief we agreed in writing, you can end the season there and owe nothing more. Starter is always one-time, with no commitment at all.'),
       faq('Do you work outside Lagos and Abuja?', 'Yes, anywhere in Nigeria. For Studio shoots, travel, accommodation and permits are quoted separately and approved by you before anything is booked.'),
     ], className='pricing-faq'),
   ], className='pricing-notes', id='faq'),
@@ -214,8 +239,8 @@ main = el('main', [
   el('footer', [el('span', 'MULTIMUDIA'), el('span', 'God Revealed in Many Media Forms')], className='pricing-footer'),
 ], className='pricing-page')
 
-DESC = 'Video packages for Nigerian founders, brands and organisations. Starter ₦450,000 one-time, Growth from ₦680,000 a month, Studio shoot and edit.'
-DESC_RE = r'(?:Pricing details coming soon\.|4 short videos and 1 long-form video\.[^"]*|Video packages for Nigerian founders[^"]*)'
+DESC = 'Video editing and production packages from Multimudia: one-time Starter from ₦450,000, or 3-month Growth and Studio seasons.'
+DESC_RE = r'(?:Pricing details coming soon\.|4 short videos and 1 long-form video\.[^"]*|Video packages for Nigerian founders[^"]*|Video editing and production packages from Multimudia[^"]*)'
 
 rsc_path = ROOT / 'pricing.rsc'
 rsc = rsc_path.read_text()
