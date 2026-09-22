@@ -54,19 +54,30 @@ def price(amount, unit, caption, variant=None, prefix=None, compare=None, per=No
     if compare: parts.append(el('p', compare, className='tier-compare'))
     return el('div', parts, className='tier-price' + (f' {variant}' if variant else ''))
 
+def dual(value, tag, className=''):
+    """A string renders once. A (one-time, season) pair renders both, toggled by the billing radios."""
+    def node(text, variant):
+        classes = ' '.join(c for c in (className, variant) if c)
+        return el(tag, text, className=classes) if classes else el(tag, text)
+    if isinstance(value, tuple):
+        return [node(value[0], 'when-once'), node(value[1], 'when-monthly')]
+    return [node(value, '')]
+
 def specs(rows):
-    return el('dl', [node for term, detail in rows for node in (el('dt', term), el('dd', detail))], className='tier-specs')
+    return el('dl', [node for term, detail in rows for node in ([el('dt', term)] + dual(detail, 'dd'))], className='tier-specs')
 
 def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None, extra=()):
-    top = [el('span', name, className='tier-name')]
+    top = dual(name, 'span', 'tier-name')
     if badge: top.append(el('span', badge, className='tier-badge'))
-    top.append(el('span', term, className='tier-term'))
-    head_parts = [el('div', top, className='tier-top'), el('p', outcome, className='tier-outcome'), el('div', prices, className='tier-prices')]
-    head_parts += list(extra) + [action, el('p', note, className='tier-note')]
+    top += dual(term, 'span', 'tier-term')
+    head_parts = [el('div', top, className='tier-top')] + dual(outcome, 'p', 'tier-outcome') + [el('div', prices, className='tier-prices')]
+    head_parts += list(extra) + [action] + dual(note, 'p', 'tier-note')
+    items = [el('li', item[0], className=item[1]) if isinstance(item, tuple) else el('li', item) for item in gets]
     body = [el('div', head_parts, className='tier-head'),
-            el('div', [el('div', [el('p', 'You get', className='tier-gets-head'), el('ul', [el('li', item) for item in gets], className='tier-list')], className='tier-gets'),
+            el('div', [el('div', [el('p', 'You get', className='tier-gets-head'), el('ul', items, className='tier-list')], className='tier-gets'),
                        specs(rows)], className='tier-body')]
-    return el('article', body, className='tier tier-' + key + (' tier-featured' if badge else ''), **{'aria-label': name + ' package'})
+    label = name[1] if isinstance(name, tuple) else name
+    return el('article', body, className='tier tier-' + key + (' tier-featured' if badge else ''), **{'aria-label': label + ' package'})
 
 def turnaround(tier, metrics, note=None):
     cols = [el('span', tier, className='turnaround-tier')]
@@ -101,32 +112,38 @@ STARTER = tier(
     extra=[el('p', 'No commitment. Upgrade to a Growth season within 14 days and your Starter fee is credited toward month one.', className='tier-only-note when-monthly')])
 
 GROWTH = tier(
-    'growth', 'GROWTH', '3-month season',
-    'A full month of content, delivered on schedule, without you chasing anyone.',
-    [price('680,000', 'NGN / month · 3-month season', 'Twelve videos a month, delivered on schedule, without you having to chase me for any of them.',
+    'growth', 'GROWTH', ('single project', '3-month season'),
+    ('Twelve videos, one project, no ongoing commitment.',
+     'A full month of content, delivered on schedule, without you chasing anyone.'),
+    [price('680,000', 'NGN / month · 3-month season', 'Twelve videos every month for three months, delivered on schedule, without you having to chase me for any of them.',
            variant='when-monthly', per='≈ ₦57,000 per video', compare='₦800,000 as a one-off — you save ₦360,000 across the season.'),
-     price('800,000', 'NGN / one-time', 'The same twelve-video scope as a single project, with no ongoing commitment.',
-           variant='when-once', compare='₦680,000 a month inside a 3-month season — 15% less for the same work.')],
+     price('800,000', 'NGN / one-time', 'A full batch of 12 videos — 10 short-form and 2 long-form — scoped, edited and delivered as one project.',
+           variant='when-once', per='≈ ₦67,000 per video', compare='₦680,000 a month inside a 3-month season — 15% less for the same work.')],
     book(),
-    'Billed monthly across a 3-month season. Nothing auto-renews — at the end, you decide if there’s a season two.',
+    ('One-time payment. No subscription, no auto-renewal.',
+     'Billed monthly across a 3-month season. Nothing auto-renews — at the end, you decide if there’s a season two.'),
     ['10 short-form edits a month', '2 long-form edits a month',
+     ('12 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
      'Burned-in captions plus .srt subtitle files', 'Subtitles in 1 extra language: Hausa, Yoruba, Igbo or Pidgin',
      '2 custom thumbnails per long-form video', 'Priority turnaround, ahead of one-off projects', 'A 30-minute check-in call each month'],
     [('Lengths', 'Shorts 15s–5 minutes (9:16) · Long-form up to 35 minutes (16:9)'),
      ('Revisions', '3 rounds per video'),
      ('Turnaround', 'First cut within 5 working days · revisions back within 48 hours'),
-     ('Best for', 'Founders, brands and creators posting every week.')],
+     ('Best for', ('Brands with a campaign, launch or backlog to clear in one go.',
+                   'Founders, brands and creators posting every week.'))],
     badge='MOST POPULAR')
 
 STUDIO = tier(
-    'studio', 'STUDIO', 'shoot + edit',
-    'I come to you, film it properly, and turn it into a story worth keeping.',
-    [price('2,125,000', 'NGN / month', 'Excludes travel. One shoot day and a full edit package every month, filmed and cut by me and a small crew.',
-           variant='when-monthly', prefix='from', compare='Saves ₦375,000 against booking each production separately.'),
-     price('2,500,000', 'NGN / production · or per month in a season', 'Excludes travel. A directed shoot and a finished film, plus a month of social cutdowns from the same footage.',
-           variant='when-once', prefix='from', compare='Book a single production, or save ₦375,000 a month inside a 3-month season.')],
+    'studio', ('STUDIO ONE', 'STUDIO'), ('one-time · shoot + edit', '3-month season'),
+    ('One shoot day. One finished film. Plus a month of cutdowns.',
+     'A shoot day at your place every month, turned into a film and a month of content.'),
+    [price('2,125,000', 'NGN / month · 3-month season', 'Excludes travel. Every month: one directed shoot day at your location, one hero film, and 8 short-form cutdowns from the same footage.',
+           variant='when-monthly', prefix='from', compare='₦2,500,000 as a single production — you save ₦1,125,000 across the season.'),
+     price('2,500,000', 'NGN / production', 'Excludes travel. A directed shoot day at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage.',
+           variant='when-once', prefix='from', compare='Run a shoot day every month inside a 3-month season and save ₦375,000 a month.')],
     book(className='pricing-cta pricing-cta-secondary'),
-    'Price excludes travel cost. Travel, accommodation and permits are quoted separately and approved by you before I book anything.',
+    ('Price excludes travel cost. Travel, accommodation and permits are quoted separately and approved by you before I book anything.',
+     'Billed monthly across a 3-month season. Nothing auto-renews — at the end, you decide if there’s a season two.'),
     ['1–2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling — I find the story on the day',
      '1 hero film, fully graded and sound-mixed', '8 short-form cutdowns from the same shoot',
      'Licensed music and a full caption and subtitle package', 'Thumbnail pack for the hero film',
@@ -134,7 +151,8 @@ STUDIO = tier(
     [('Lengths', 'Hero film 5–35 minutes · Shorts 15s–5 minutes'),
      ('Revisions', '3 rounds on the hero film, 2 on each cutdown'),
      ('Turnaround', 'Shoot booked within 3 weeks · first cut 10 working days after wrap'),
-     ('Best for', 'Organisations, agencies and brands with a story that deserves to be filmed, not just edited.')])
+     ('Best for', ('One story that deserves to be filmed properly, once.',
+                   'Organisations and brands with a story worth filming every month, not just edited.'))])
 
 main = el('main', [
   el('section', [
