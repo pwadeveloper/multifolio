@@ -66,18 +66,46 @@ def dual(value, tag, className=''):
 def specs(rows):
     return el('dl', [node for term, detail in rows for node in ([el('dt', term)] + dual(detail, 'dd'))], className='tier-specs')
 
-def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None, extra=()):
+def get_item(item):
+    return el('li', item[0], className=item[1]) if isinstance(item, tuple) else el('li', item)
+
+def compare_box(once, season):
+    """Comparison boxes live in the expanded panel but still follow the billing toggle."""
+    return [el('p', once, className='tier-compare when-once'), el('p', season, className='tier-compare when-monthly')]
+
+def more_button(panel_id, label='See more'):
+    return el('button', [el('span', label, className='more-label'), el('span', '', className='more-chevron', **{'aria-hidden': 'true'})],
+              type='button', className='more-toggle',
+              **{'aria-expanded': 'false', 'aria-controls': panel_id, 'data-more': label, 'data-less': label.replace('See more', 'See less').replace('See what’s included', 'Hide what’s included')})
+
+def panel(panel_id, children):
+    # inert both hides it from assistive tech and keyboard, and doubles as the
+    # style hook for the height transition (display:none could not animate).
+    return el('div', el('div', children, className='panel-inner'), className='more-panel', id=panel_id, inert=True)
+
+def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None, extra=(), compares=(), visible=5):
     top = dual(name, 'span', 'tier-name')
     if badge: top.append(el('span', badge, className='tier-badge'))
     top += dual(term, 'span', 'tier-term')
-    head_parts = [el('div', top, className='tier-top')] + dual(outcome, 'p', 'tier-outcome') + [el('div', prices, className='tier-prices')]
-    head_parts += list(extra) + [action] + dual(note, 'p', 'tier-note')
-    items = [el('li', item[0], className=item[1]) if isinstance(item, tuple) else el('li', item) for item in gets]
-    body = [el('div', head_parts, className='tier-head'),
-            el('div', [el('div', [el('p', 'You get', className='tier-gets-head'), el('ul', items, className='tier-list')], className='tier-gets'),
-                       specs(rows)], className='tier-body')]
+    head_parts = [el('div', top, className='tier-top')] + dual(outcome, 'p', 'tier-outcome') + [el('div', prices, className='tier-prices')] + list(extra)
+    shown, rest = gets[:visible], gets[visible:]
+    panel_id = 'more-' + key
+    hidden = ([el('ul', [get_item(i) for i in rest], className='tier-list')] if rest else []) + [specs(rows)] + list(compares)
+    foot = [action] + dual(note, 'p', 'tier-note') + [more_button(panel_id)]
+    body = [el('div', [el('p', 'You get', className='tier-gets-head'), el('ul', [get_item(i) for i in shown], className='tier-list')], className='tier-gets'),
+            el('div', foot, className='tier-foot'),
+            panel(panel_id, hidden)]
     label = name[1] if isinstance(name, tuple) else name
-    return el('article', body, className='tier tier-' + key + (' tier-featured' if badge else ''), **{'aria-label': label + ' package'})
+    return el('article', [el('div', head_parts, className='tier-head'), el('div', body, className='tier-body')],
+              className='tier tier-' + key + (' tier-featured' if badge else ''), **{'aria-label': label + ' package'})
+
+def band(heading, description, price_line, action, gets, rows, note):
+    hidden = [el('p', 'You get', className='tier-gets-head'), el('ul', [get_item(i) for i in gets], className='tier-list'), specs(rows), el('p', note, className='band-note')]
+    return el('section', [
+        el('div', [el('h3', heading), el('p', description, className='band-description'), el('p', price_line, className='band-price')], className='band-main'),
+        el('div', [action, more_button('more-studio', 'See what’s included')], className='band-actions'),
+        panel('more-studio', hidden),
+    ], className='studio-band', **{'aria-label': 'Studio production'})
 
 def turnaround(tier, metrics, note=None):
     cols = [el('span', tier, className='turnaround-tier')]
@@ -116,34 +144,31 @@ GROWTH = tier(
     ('Twelve videos, one project, no ongoing commitment.',
      'Twelve videos every month for three months, delivered on schedule, without you having to chase me for any of them.'),
     [price('680,000', 'NGN / month · 3-month season',
-           variant='when-monthly', per='≈ ₦57,000 per video', compare='₦800,000 as a one-off — you save ₦360,000 across the season.'),
+           variant='when-monthly', per='≈ ₦57,000 per video'),
      price('800,000', 'NGN / one-time', 'A full batch of 12 videos — 10 short-form and 2 long-form — scoped, edited and delivered as one project.',
-           variant='when-once', per='≈ ₦67,000 per video', compare='₦680,000 a month inside a 3-month season — 15% less for the same work.')],
+           variant='when-once', per='≈ ₦67,000 per video')],
     book(),
     ('One-time payment. No subscription, no auto-renewal.',
      'Billed monthly across a 3-month season. Nothing auto-renewal'),
     ['10 short-form edits a month', '2 long-form edits a month',
-     ('12 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
      'Burned-in captions plus .srt subtitle files', 'Subtitles in 1 extra language: Hausa, Yoruba, Igbo or Pidgin',
-     '2 custom thumbnails per long-form video', 'Priority turnaround, ahead of one-off projects', 'A 30-minute check-in call each month'],
+     '2 custom thumbnails per long-form video',
+     ('12 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
+     'Priority turnaround, ahead of one-off projects', 'A 30-minute check-in call each month'],
     [('Lengths', 'Shorts 15s–5 minutes (9:16) · Long-form up to 35 minutes (16:9)'),
      ('Revisions', '3 rounds per video'),
      ('Turnaround', 'First cut within 5 working days · revisions back within 48 hours'),
      ('Best for', ('Brands with a campaign, launch or backlog to clear in one go.',
                    'Founders, brands and creators posting every week.'))],
-    badge='MOST POPULAR')
+    badge='MOST POPULAR',
+    compares=compare_box('₦680,000 a month inside a 3-month season — 15% less for the same work.',
+                         '₦800,000 as a one-off — you save ₦360,000 across the season.'))
 
-STUDIO = tier(
-    'studio', ('STUDIO ONE', 'STUDIO'), ('one-time · shoot + edit', '3-month season'),
-    ('Up to two shoot days. One finished film. Plus a month of cutdowns.',
-     'Up to two shoot days at your place every month, turned into a film and a month of content.'),
-    [price('2,125,000', 'NGN / month · 3-month season', 'Excludes travel. Every month: up to two directed shoot days at your location, one hero film, and 8 short-form cutdowns from the same footage.',
-           variant='when-monthly', prefix='from', compare='₦2,500,000 as a single production — you save ₦1,125,000 across the season.'),
-     price('2,500,000', 'NGN / production', 'Excludes travel. Up to two directed shoot days at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage.',
-           variant='when-once', prefix='from', compare='Run shoot days every month inside a 3-month season and save ₦375,000 a month.')],
-    book(className='pricing-cta pricing-cta-secondary'),
-    ('Price excludes travel cost. Travel, accommodation and permits are quoted separately and approved by you before I book anything.',
-     'Billed monthly across a 3-month season. Nothing auto-renewal'),
+STUDIO = band(
+    'Studio — I come to you and film it',
+    'Excludes travel. Up to two directed shoot days at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage.',
+    'from ₦2,500,000 per production · or ₦2,125,000 a month in a 3-month season',
+    book(className='pricing-cta pricing-cta-secondary band-cta'),
     ['Up to 2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling — I find the story on the day',
      '1 hero film, fully graded and sound-mixed', '8 short-form cutdowns from the same shoot',
      'Licensed music and a full caption and subtitle package', 'Thumbnail pack for the hero film',
@@ -151,8 +176,8 @@ STUDIO = tier(
     [('Lengths', 'Hero film 5–35 minutes · Shorts 15s–5 minutes'),
      ('Revisions', '3 rounds on the hero film, 2 on each cutdown'),
      ('Turnaround', 'Shoot booked within 3 weeks · first cut 10 working days after wrap'),
-     ('Best for', ('One story that deserves to be filmed properly, once.',
-                   'Organisations and brands with a story worth filming every month, not just edited.'))])
+     ('Best for', 'Organisations and brands with a story worth filming properly, not just edited.')],
+    'Price excludes travel cost. Travel, accommodation and permits are quoted separately and approved by you before I book anything.')
 
 main = el('main', [
   el('section', [
@@ -175,7 +200,8 @@ main = el('main', [
       el('label', ['Season · 3 months', el('span', 'save 15%', className='toggle-save')], htmlFor='bill-month'),
     ], className='billing-toggle'),
     el('p', 'The same scope costs 15% less inside a 3-month season than it does as one-off projects. Starter is always one-time.', className='billing-note', id='billing-note'),
-    el('div', [STARTER, GROWTH, STUDIO], className='pricing-tiers'),
+    el('div', [STARTER, GROWTH], className='pricing-tiers'),
+    STUDIO,
     el('p', 'I take on 5 new Growth clients a month. Next opening: [FILL: MONTH]. Not sure which fits? Book the call — I’ll tell you honestly, even if the answer is Starter.', className='tiers-footnote'),
   ], className='pricing-section pricing-section-packages', id='packages'),
 
@@ -240,6 +266,30 @@ main = el('main', [
   el('footer', [el('span', 'MULTIMUDIA'), el('span', 'God Revealed in Many Media Forms')], className='pricing-footer'),
 ], className='pricing-page')
 
+# Disclosure behaviour. Delegated from document and appended outside <main>, so
+# React never owns it and hydration cannot revert it.
+TOGGLE_JS = (
+    "<script>(function(){"
+    "function setLabel(b,open){var s=b.querySelector('.more-label');"
+    "if(s)s.textContent=open?b.getAttribute('data-less'):b.getAttribute('data-more');}"
+    "document.addEventListener('click',function(e){"
+    "var b=e.target&&e.target.closest?e.target.closest('.more-toggle'):null;if(!b)return;"
+    "var p=document.getElementById(b.getAttribute('aria-controls'));if(!p)return;"
+    "var g=document.querySelector('.pricing-tiers');"
+    "var inGrid=!!(g&&g.contains(b));"
+    "var cards=g?[].slice.call(g.querySelectorAll('.tier')):[];"
+    "if(inGrid&&!g.classList.contains('is-expanded')){"
+    "cards.forEach(function(c){c.style.minHeight=Math.round(c.getBoundingClientRect().height)+'px';});}"
+    "var open=b.getAttribute('aria-expanded')!=='true';"
+    "b.setAttribute('aria-expanded',open?'true':'false');"
+    "if(open){p.removeAttribute('inert');}else{p.setAttribute('inert','');}"
+    "setLabel(b,open);"
+    "if(inGrid){var any=!!g.querySelector('.more-toggle[aria-expanded=\"true\"]');"
+    "g.classList.toggle('is-expanded',any);"
+    "if(!any)cards.forEach(function(c){c.style.minHeight='';});}"
+    "});})()</script>"
+)
+
 DESC = 'Video editing and production packages from Multimudia: one-time Starter from ₦450,000, or 3-month Growth and Studio seasons.'
 DESC_RE = r'(?:Pricing details coming soon\.|4 short videos and 1 long-form video\.[^"]*|Video packages for Nigerian founders[^"]*|Video editing and production packages from Multimudia[^"]*)'
 
@@ -255,5 +305,6 @@ page = re.sub(r'<main\b.*?</main>', lambda _: render(main), page, flags=re.S)
 page = page.replace('Pricing — Deji Ajetomobi', 'Pricing — Multimudia')
 page = re.sub(DESC_RE, DESC, page)
 page += '<script>self.__VINEXT_RSC_CHUNKS__=[' + json.dumps(rsc).replace('<', '\\u003c') + '];self.__VINEXT_RSC_DONE__=true</script>'
+page += TOGGLE_JS
 p.write_text(page)
 print('Built Pricing HTML and RSC from the same content tree.')
