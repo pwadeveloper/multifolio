@@ -139,7 +139,7 @@ def stepper(key, name, detail, one, many):
 
 def extra(key, name, detail):
     return el('label', [
-        el('span', [el('span', name, className='extra-name'), el('span', detail, className='extra-detail')], className='extra-text'),
+        el('span', [el('span', name, className='extra-name'), el('span', detail, className='extra-detail', **{'data-extra-detail': key})], className='extra-text'),
         el('input', type='checkbox', className='extra-input', **{'data-field': key}),
         el('span', '', className='extra-switch', **{'aria-hidden': 'true'}),
     ], className='extra-row')

@@ -169,6 +169,33 @@ test('14 shorts is exactly the Growth price, with the long-form swapped out', ()
   assert.equal(pricePackage({shorts: 14, season: true}).total, RATES.growth.season);
 });
 
+test('Growth includes extra-language subtitles: 12 to 14 videos stay at the Growth price', () => {
+  // The package covers 10 shorts + 2 long, or up to 14 shorts with the swap.
+  for (const cart of [{shorts: 12}, {shorts: 13}, {shorts: 14}, {shorts: 10, longForm: 2}]) {
+    const once = pricePackage({...cart, extraLanguage: true});
+    assert.equal(once.total, RATES.growth.oneTime, `${cart.shorts}s+${cart.longForm || 0}L one-time`);
+    assert.equal(once.extraLanguageAmount, 0);
+    assert.equal(once.languageIncluded, once.videos);
+    assert.equal(pricePackage({...cart, extraLanguage: true, season: true}).total, RATES.growth.season);
+  }
+});
+
+test('videos past the package still pay for extra-language subtitles', () => {
+  const quote = pricePackage({shorts: 16, extraLanguage: true});   // 14 covered, 2 beyond
+  assert.equal(quote.languageIncluded, 14);
+  assert.equal(quote.extraLanguageAmount, 2 * RATES.extraLanguagePerVideo);
+  assert.equal(quote.total, RATES.growth.oneTime + 2 * RATES.addOns.oneTime.shortForm + 2 * RATES.extraLanguagePerVideo);
+  const items = lineItems(quote);
+  assert.ok(items.some((item) => /included with Growth/.test(item.label) && item.qty === 14 && item.amount === null));
+  assert.ok(items.some((item) => item.label === 'Subtitles in an extra language' && item.qty === 2 && item.amount === 30000));
+});
+
+test('a la carte carts still pay for extra-language subtitles on every video', () => {
+  const quote = pricePackage({shorts: 8, extraLanguage: true});
+  assert.equal(quote.extraLanguageAmount, 8 * RATES.extraLanguagePerVideo);
+  assert.equal(quote.languageIncluded, 0);
+});
+
 test('unused long-form allowance converts, and only one way', () => {
   assert.equal(pricePackage({shorts: 14}).shortAllowance, 14);            // 0 long-form used
   assert.equal(pricePackage({shorts: 12, longForm: 1}).shortAllowance, 12); // 1 used

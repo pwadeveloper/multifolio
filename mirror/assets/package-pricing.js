@@ -95,18 +95,25 @@ export function pricePackage(cart = {}, options = {}) {
   const extraLongFormAmount = extraLongForm * addOn.longForm;
   const routeB = base + extraShortsAmount + extraLongFormAmount;
 
+  // Growth includes subtitles in one extra language, so through the package the
+  // add-on is only charged on videos past what the package covers. That makes
+  // it route-dependent, so it counts when choosing the cheaper route.
+  const beyondPackage = extraShorts + extraLongForm;
+  const languageA = cart.extraLanguage ? RATES.extraLanguagePerVideo * videos : 0;
+  const languageB = cart.extraLanguage ? RATES.extraLanguagePerVideo * beyondPackage : 0;
+
   // Charge the lower route, and never less than the package itself.
-  const isPackage = videos >= RATES.packageVideos && routeB <= routeA;
-  const videosAfterDiscount = videos >= RATES.packageVideos
-    ? Math.max(Math.min(routeA, routeB), base)
-    : routeA;
+  const isPackage = videos >= RATES.packageVideos && routeB + languageB <= routeA + languageA;
+  const videosAfterDiscount = videos < RATES.packageVideos ? routeA
+    : isPackage ? routeB
+    : Math.max(routeA, base);
   // The batch and season lines only describe route A; the package has its own.
   const discountRate = isPackage ? 0 : best.rate;
   const discountAmount = isPackage ? 0 : videoSubtotal - routeA;
 
   // 3. Extras sit outside both routes and outside the discount.
-  const extrasSubtotal =
-    (cart.extraLanguage ? RATES.extraLanguagePerVideo * videos : 0) +
+  const extraLanguageAmount = isPackage ? languageB : languageA;
+  const extrasSubtotal = extraLanguageAmount +
     (cart.thumbnails ? RATES.thumbnails * (RATES.thumbnailsPerVideo ? videos : 1) : 0);
 
   // 4. Subtotal, then 5. rush as a surcharge on everything before it.
@@ -151,6 +158,10 @@ export function pricePackage(cart = {}, options = {}) {
     extraLongForm: isPackage ? extraLongForm : 0,
     extraShortsAmount: isPackage ? extraShortsAmount : 0,
     extraLongFormAmount: isPackage ? extraLongFormAmount : 0,
+    // Extra-language subtitles: how many videos Growth covers for free, and
+    // what the rest cost.
+    languageIncluded: isPackage && cart.extraLanguage === true ? videos - beyondPackage : 0,
+    extraLanguageAmount,
     // A shorts-only package cart has traded its long-form allowance away.
     swapped: isPackage && longForm === 0,
     swappedShorts: (RATES.growth.longForm) * RATES.swapRatio,
@@ -180,7 +191,11 @@ export function lineItems(quote) {
     if (quote.longForm) items.push({label: 'Long-form edits, up to 20 min', qty: quote.longForm, amount: quote.longForm * RATES.longForm});
     if (quote.discountRate) items.push({label: quote.discountLabel + ' (' + Math.round(quote.discountRate * 100) + '% off the videos)', qty: null, amount: -quote.discountAmount});
   }
-  if (quote.extraLanguage) items.push({label: 'Subtitles in an extra language', qty: quote.videos, amount: RATES.extraLanguagePerVideo * quote.videos});
+  if (quote.extraLanguage) {
+    const charged = quote.videos - quote.languageIncluded;
+    if (quote.languageIncluded) items.push({label: 'Subtitles in an extra language, included with Growth', qty: quote.languageIncluded, amount: null});
+    if (charged) items.push({label: 'Subtitles in an extra language', qty: charged, amount: quote.extraLanguageAmount});
+  }
   if (quote.thumbnails) items.push({label: 'Custom thumbnails', qty: RATES.thumbnailsPerVideo ? quote.videos : 1, amount: RATES.thumbnails * (RATES.thumbnailsPerVideo ? quote.videos : 1)});
   if (quote.rush) items.push({label: 'Rush 48-hour delivery, 35%', qty: null, amount: quote.rushAmount});
   return items;

@@ -95,6 +95,15 @@ function start() {
       : quote.videos + (quote.videos === 1 ? ' video' : ' videos') + (quote.season ? ' a month' : '') +
         ' · ≈ ' + formatNaira(quote.perVideo) + ' per video';
 
+    // Growth includes extra-language subtitles, so the toggle stops quoting a
+    // price for the videos the package covers.
+    const language = $('[data-extra-detail=extraLanguage]');
+    if (!language.dataset.base) language.dataset.base = language.textContent;
+    const beyond = quote.extraShorts + quote.extraLongForm;
+    language.textContent = !isPackage ? language.dataset.base
+      : 'Hausa, Yoruba, Igbo or Pidgin · included with Growth' +
+        (beyond ? ', ' + formatNaira(RATES.extraLanguagePerVideo) + ' per video beyond it' : '');
+
     const saving = $('[data-saving]');
     saving.hidden = !quote.discountRate;
     if (quote.discountRate) saving.textContent = quote.discountLabel + ' — you save ' + formatNaira(quote.discountAmount);
