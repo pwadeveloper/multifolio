@@ -191,6 +191,21 @@ BUILDER = el('dialog', [
                 el('p', 'How many videos', className='tier-gets-head', **{'data-qty-head': 'true'}),
                 stepper('shorts', 'Short-form edits', '15\u201390s \u00b7 \u20a690,000 each', 'short-form edit', 'Number of short-form edits'),
                 stepper('longForm', 'Long-form edits', 'Up to 20 min \u00b7 \u20a6180,000 each', 'long-form edit', 'Number of long-form edits'),
+                # Anything that appears as the cart changes lives here, under the
+                # steppers that caused it, and scrolls with the list. The pinned
+                # panel stays one fixed shape, so it can never crowd the list out.
+                el('div', [
+                    el('p', '', className='build-saving', **{'data-saving': 'true'}, hidden=True),
+                    el('p', '', className='build-nudge', **{'data-nudge': 'true'}, hidden=True),
+                    el('div', [
+                        el('p', 'Growth package + extras', className='tier-gets-head'),
+                        el('div', '', **{'data-package-lines': 'true'}),
+                    ], className='build-package', **{'data-package': 'true'}, hidden=True),
+                    el('div', [
+                        el('p', 'Growth covers 12 videos and includes captions, .srt files, extra-language subtitles and priority turnaround. Anything beyond that prices at the package rate.', className='build-note'),
+                        el('button', 'See Growth', type='button', className='more-toggle', **{'data-see-growth': 'true'}),
+                    ], className='build-package-note', **{'data-package-note': 'true'}, hidden=True),
+                ], className='build-details'),
             ], className='builder-section'),
             el('section', [
                 el('p', 'Extras', className='tier-gets-head'),
@@ -199,6 +214,7 @@ BUILDER = el('dialog', [
                 extra('rush', 'Rush 48-hour delivery', '+35% of the subtotal'),
                 el('p', 'Captions burned in, colour and sound pass, and platform-correct exports are included on every video.', className='build-note'),
             ], className='builder-section'),
+            el('button', 'Start over', type='button', className='more-toggle build-reset', **{'data-reset': 'true'}),
         ], **{'data-pane': 'build'}),
 
         el('section', [
@@ -219,19 +235,9 @@ BUILDER = el('dialog', [
 
     el('div', [
         el('div', [
-            el('div', [
-                el('p', 'Growth package + extras', className='tier-gets-head'),
-                el('div', '', **{'data-package-lines': 'true'}),
-            ], className='build-package', **{'data-package': 'true'}, hidden=True),
             el('p', '\u20a60', className='build-total', **{'data-total': 'true', 'aria-hidden': 'true'}),
             el('p', '', className='build-meta', **{'data-season-meta': 'true'}, hidden=True),
             el('p', 'Add at least one video to see your price.', className='build-meta', **{'data-meta': 'true'}),
-            el('p', '', className='build-saving', **{'data-saving': 'true'}, hidden=True),
-            el('p', '', className='build-nudge', **{'data-nudge': 'true'}, hidden=True),
-            el('div', [
-                el('p', 'Growth covers 12 videos and includes captions, .srt files, extra-language subtitles and priority turnaround. Anything beyond that prices at the package rate.', className='build-note'),
-                el('button', 'See Growth', type='button', className='more-toggle', **{'data-see-growth': 'true'}),
-            ], className='build-package-note', **{'data-package-note': 'true'}, hidden=True),
         ], **{'data-quote': 'true'}),
 
 
@@ -252,7 +258,6 @@ BUILDER = el('dialog', [
             el('button', 'Back to the builder', type='button', className='more-toggle', **{'data-back': 'true'}),
         ], className='build-actions', **{'data-actions': 'checkout'}, hidden=True),
 
-        el('button', 'Start over', type='button', className='more-toggle build-reset', **{'data-reset': 'true'}),
         el('p', '', className='build-live', **{'data-live': 'true', 'aria-live': 'polite', 'role': 'status'}),
     ], className='builder-panel'),
 ], id='builder', className='builder', role='dialog', **{'aria-modal': 'true', 'aria-labelledby': 'builder-title'})
