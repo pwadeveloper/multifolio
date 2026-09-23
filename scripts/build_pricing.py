@@ -83,16 +83,19 @@ def panel(panel_id, children):
     # style hook for the height transition (display:none could not animate).
     return el('div', el('div', children, className='panel-inner'), className='more-panel', id=panel_id, inert=True)
 
-def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None, extra=(), compares=(), visible=5):
+def tier(key, name, term, outcome, prices, action, note, gets, rows, badge=None, extra=(), compares=(), detail=(), swap=None, visible=5):
     top = dual(name, 'span', 'tier-name')
     if badge: top.append(el('span', badge, className='tier-badge'))
     top += dual(term, 'span', 'tier-term')
     head_parts = [el('div', top, className='tier-top')] + dual(outcome, 'p', 'tier-outcome') + [el('div', prices, className='tier-prices')] + list(extra)
     shown, rest = gets[:visible], gets[visible:]
     panel_id = 'more-' + key
-    hidden = ([el('ul', [get_item(i) for i in rest], className='tier-list')] if rest else []) + [specs(rows)] + list(compares)
+    hidden = ([el('ul', [get_item(i) for i in rest], className='tier-list')] if rest else []) + list(detail) + [specs(rows)] + list(compares)
     foot = [action] + dual(note, 'p', 'tier-note') + [more_button(panel_id)]
-    body = [el('div', [el('p', 'You get', className='tier-gets-head'), el('ul', [get_item(i) for i in shown], className='tier-list')], className='tier-gets'),
+    # A swap is a substitution, not another deliverable, so it sits under the list rather than in it.
+    gets = [el('p', 'You get', className='tier-gets-head'), el('ul', [get_item(i) for i in shown], className='tier-list')]
+    if swap: gets.append(el('p', swap, className='tier-swap'))
+    body = [el('div', gets, className='tier-gets'),
             el('div', foot, className='tier-foot'),
             panel(panel_id, hidden)]
     label = name[1] if isinstance(name, tuple) else name
@@ -123,6 +126,137 @@ def step(number, title, body):
 def faq(question, answer):
     return el('details', [el('summary', question), el('p', answer)])
 
+def stepper(key, name, detail, one, many):
+    """A counter row: real buttons either side of a typeable field."""
+    return el('div', [
+        el('div', [el('h3', name), el('p', detail)], className='build-row-text'),
+        el('div', [
+            el('button', '\u2212', type='button', className='stepper-btn', **{'data-field': key, 'data-delta': '-1', 'aria-label': 'Remove one ' + one}),
+            el('input', type='text', className='stepper-input', value='0', inputmode='numeric', autocomplete='off', **{'data-field': key, 'aria-label': many}),
+            el('button', '+', type='button', className='stepper-btn', **{'data-field': key, 'data-delta': '1', 'aria-label': 'Add one ' + one}),
+        ], className='stepper'),
+    ], className='build-row')
+
+def extra(key, name, detail):
+    return el('label', [
+        el('span', [el('span', name, className='extra-name'), el('span', detail, className='extra-detail')], className='extra-text'),
+        el('input', type='checkbox', className='extra-input', **{'data-field': key}),
+        el('span', '', className='extra-switch', **{'aria-hidden': 'true'}),
+    ], className='extra-row')
+
+def field(label, name, kind, complete, maxlen):
+    return el('label', [el('span', label), el('input', type=kind, name=name, autocomplete=complete, maxlength=maxlen)], className='build-field')
+
+def icon(name, children):
+    return el('svg', children, className='copy-icon copy-icon-' + name, viewBox='0 0 20 20',
+              width='16', height='16', fill='none', stroke='currentColor',
+              **{'stroke-width': '1.6', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true'})
+
+def copy_button():
+    return el('button', [
+        el('span', 'Copy details', **{'data-copy-label': 'true'}),
+        icon('copy', [el('rect', x='7.75', y='7.75', width='8.5', height='8.5', rx='2'),
+                      el('path', d='M12.25 4.75h-7.5a1.5 1.5 0 0 0-1.5 1.5v7.5')]),
+        icon('done', [el('path', d='M4.75 10.5l3.5 3.5 7-7.5')]),
+    ], type='button', className='pricing-cta pricing-cta-secondary', **{'data-copy': 'true'})
+
+def action(label, key, className='pricing-cta', glyph='\u2197'):
+    children = [el('span', label, **({'data-checkout-label': 'true'} if key == 'go-checkout' else {}))]
+    if glyph: children.append(el('span', glyph, **{'aria-hidden': 'true'}))
+    return el('button', children, type='button', className=className, **{'data-' + key: 'true'})
+
+# The builder is rendered outside <main> for the same reason as the disclosure
+# script: React hydrates <main> from the RSC payload and must not own this.
+BUILDER = el('dialog', [
+    el('button', '', type='button', className='builder-grab', **{'data-close': 'true', 'aria-label': 'Close the builder'}),
+    el('header', [
+        el('div', [
+            el('h2', 'Build your own package', id='builder-title'),
+            el('p', 'Pick what you need. The more you add, the less each one costs.', className='builder-lead'),
+        ]),
+        el('button', '\u00d7', type='button', className='builder-close', **{'data-close': 'true', 'aria-label': 'Close the builder'}),
+    ], className='builder-head'),
+
+    el('div', [
+        el('section', [
+            el('div', [
+                el('input', type='radio', name='build-billing', id='build-once', className='bill-input', defaultChecked=True),
+                el('input', type='radio', name='build-billing', id='build-season', className='bill-input'),
+                el('div', [
+                    el('label', 'One-time', htmlFor='build-once'),
+                    el('label', ['Season \u00b7 3 months', el('span', 'save 15%', className='toggle-save')], htmlFor='build-season'),
+                ], className='billing-toggle'),
+            ], className='builder-billing'),
+            el('section', [
+                el('p', 'How many videos', className='tier-gets-head', **{'data-qty-head': 'true'}),
+                stepper('shorts', 'Short-form edits', '15\u201390s \u00b7 \u20a690,000 each', 'short-form edit', 'Number of short-form edits'),
+                stepper('longForm', 'Long-form edits', 'Up to 20 min \u00b7 \u20a6180,000 each', 'long-form edit', 'Number of long-form edits'),
+            ], className='builder-section'),
+            el('section', [
+                el('p', 'Extras', className='tier-gets-head'),
+                extra('extraLanguage', 'Subtitles in an extra language', 'Hausa, Yoruba, Igbo or Pidgin \u00b7 \u20a615,000 per video'),
+                extra('thumbnails', 'Custom thumbnails', '\u20a612,000 each'),
+                extra('rush', 'Rush 48-hour delivery', '+35% of the subtotal'),
+                el('p', 'Captions burned in, colour and sound pass, and platform-correct exports are included on every video.', className='build-note'),
+            ], className='builder-section'),
+        ], **{'data-pane': 'build'}),
+
+        el('section', [
+            el('p', 'Copy your package details, then paste them into the booking notes so I know what we\u2019re discussing.', className='build-note'),
+            el('div', '', className='build-summary', tabindex='0', **{'data-summary': 'true'}),
+        ], **{'data-pane': 'book'}, hidden=True),
+
+        el('section', [
+            el('p', 'Order summary', className='tier-gets-head'),
+            el('div', '', className='build-order', **{'data-order': 'true'}),
+            field('Full name', 'name', 'text', 'name', '120'),
+            field('Email address', 'email', 'email', 'email', '254'),
+            field('Phone (optional)', 'phone', 'tel', 'tel', '32'),
+            el('p', 'Billed monthly across a 3-month season. Nothing auto-renews.', className='build-note', **{'data-season-note': 'true'}),
+            el('p', 'Payment is not connected yet. This step is here for review: wiring it means the server prices the cart from these same rates, so an amount can never be set from the browser.', className='build-note'),
+        ], **{'data-pane': 'checkout'}, hidden=True),
+    ], className='builder-body'),
+
+    el('div', [
+        el('div', [
+            el('div', [
+                el('p', 'Growth package + extras', className='tier-gets-head'),
+                el('div', '', **{'data-package-lines': 'true'}),
+            ], className='build-package', **{'data-package': 'true'}, hidden=True),
+            el('p', '\u20a60', className='build-total', **{'data-total': 'true', 'aria-hidden': 'true'}),
+            el('p', '', className='build-meta', **{'data-season-meta': 'true'}, hidden=True),
+            el('p', 'Add at least one video to see your price.', className='build-meta', **{'data-meta': 'true'}),
+            el('p', '', className='build-saving', **{'data-saving': 'true'}, hidden=True),
+            el('p', '', className='build-nudge', **{'data-nudge': 'true'}, hidden=True),
+            el('div', [
+                el('p', 'Growth covers 12 videos and includes captions, .srt files, extra-language subtitles and priority turnaround. Anything beyond that prices at the package rate.', className='build-note'),
+                el('button', 'See Growth', type='button', className='more-toggle', **{'data-see-growth': 'true'}),
+            ], className='build-package-note', **{'data-package-note': 'true'}, hidden=True),
+        ], **{'data-quote': 'true'}),
+
+
+        el('div', [
+            action('Checkout', 'go-checkout'),
+            action('Book a call about this', 'go-book', 'pricing-cta pricing-cta-secondary'),
+        ], className='build-actions', **{'data-actions': 'build'}),
+
+        el('div', [
+            copy_button(),
+            cta('Open the booking page', BOOKING, 'pricing-cta', target='_blank', rel='noopener noreferrer'),
+            el('button', 'Back to the builder', type='button', className='more-toggle', **{'data-back': 'true'}),
+        ], className='build-actions', **{'data-actions': 'book'}, hidden=True),
+
+        el('div', [
+            el('button', [el('span', 'Checkout', **{'data-pay-label': 'true'}), el('span', '\u2197', **{'aria-hidden': 'true'})],
+               type='button', className='pricing-cta', disabled=True, **{'data-pay': 'true'}),
+            el('button', 'Back to the builder', type='button', className='more-toggle', **{'data-back': 'true'}),
+        ], className='build-actions', **{'data-actions': 'checkout'}, hidden=True),
+
+        el('button', 'Start over', type='button', className='more-toggle build-reset', **{'data-reset': 'true'}),
+        el('p', '', className='build-live', **{'data-live': 'true', 'aria-live': 'polite', 'role': 'status'}),
+    ], className='builder-panel'),
+], id='builder', className='builder', role='dialog', **{'aria-modal': 'true', 'aria-labelledby': 'builder-title'})
+
 # --- page ------------------------------------------------------------------
 
 STARTER = tier(
@@ -151,7 +285,7 @@ GROWTH = tier(
      'Billed monthly across a 3-month season. Nothing auto-renews. At the end you decide if there’s a season two.'),
     ['10 short-form edits a month', '2 long-form edits a month',
      'Burned-in captions plus .srt subtitle files', 'Subtitles in 1 extra language: Hausa, Yoruba, Igbo or Pidgin',
-     '2 custom thumbnails per long-form video', 'First cut in 5 working days',
+     'First cut in 5 working days',
      ('12 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
      'Priority turnaround, ahead of one-off projects', 'A 30-minute check-in call each month'],
     [('Lengths', 'Shorts 15s–5 minutes (9:16) · Long-form up to 35 minutes (16:9)'),
@@ -159,7 +293,15 @@ GROWTH = tier(
      ('Turnaround', 'First cut within 5 working days · revisions back within 48 hours'),
      ('Best for', ('Brands with a campaign, launch or backlog to clear in one go.',
                    'Founders, brands and creators posting every week.'))],
-    badge='MOST POPULAR', visible=6,
+    badge='MOST POPULAR', visible=5,
+    swap='No long-form? Swap them for 4 extra shorts — 14 shorts a month, same price.',
+    detail=(el('p', 'Shorts-only option', className='tier-gets-head tier-swap-head'),
+            el('p', 'Trade the 2 long-form edits for 4 extra shorts: 14 short-form edits a month at the same price. '
+                    'You still get burned-in captions plus .srt files, 4 cover frames for your feed grid, and '
+                    'extra-language captions burned into 4 of the shorts, in place of the long-form '
+                    'subtitles. Long-form can be swapped for shorts, not the other way round. Shorts are cut from the '
+                    'same batch of footage — shorts from 14 separate sources are quoted individually.',
+               className='tier-swap-detail')),
     compares=compare_box('₦680,000 a month inside a 3-month season. That’s 15% less for the same work.',
                          '₦800,000 as a one-off, so you save ₦360,000 across the season.'))
 
@@ -201,6 +343,11 @@ main = el('main', [
     ], className='billing-toggle'),
     el('p', 'The same scope costs 15% less inside a 3-month season than it does as one-off projects. Starter is always one-time.', className='billing-note', id='billing-note'),
     el('div', [STARTER, GROWTH], className='pricing-tiers'),
+    el('div', [
+      el('button', [el('span', 'Build your own package'), el('span', '\u2197', **{'aria-hidden': 'true'})],
+         type='button', className='pricing-cta pricing-cta-secondary build-trigger', **{'data-build-open': 'true'}),
+      el('p', 'Need a different mix, or just a couple of edits? Price it yourself in 30 seconds.', className='build-trigger-note'),
+    ], className='build-trigger-row'),
     STUDIO,
   ], className='pricing-section pricing-section-packages', id='packages'),
 
@@ -218,6 +365,7 @@ main = el('main', [
       addon('Rush 48-hour delivery', 'Subject to availability. I’ll tell you before you pay.', '+35% of the project fee'),
     ], className='addons'),
     el('p', 'Add-ons build on a brief and editing style we’ve already set up, so each one costs less than starting fresh. Quoted and approved before I start them. Nothing reaches an invoice you haven’t seen first.', className='addons-note'),
+    el('p', 'Already on Growth and want the balance changed? Long-form edits trade for 2 shorts each, at no extra cost.', className='addons-note'),
   ], className='pricing-section', id='add-ons'),
 
   el('section', [
@@ -250,6 +398,7 @@ main = el('main', [
       faq('What if I have no footage at all?', 'Then Starter and Growth aren’t for you yet. Studio is. I come and film it. If a full production is more than you need right now, book the call anyway and I’ll map out the cheapest way to get usable footage, even if that’s you and a phone on a tripod.'),
       faq('How do I pay?', [el('strong', 'Starter:'), ' Full payment immediately. ', el('strong', 'Growth:'), ' billed monthly, on the same date each month. ', el('strong', 'Studio:'), ' 70% before the shoot, 30% on final delivery. Bank transfer and card both work. Invoices and receipts for organisations and agencies, and I can work with your procurement process.']),
       faq('How many revisions do I get?', 'Starter 2 rounds per video, Growth 3, Studio 3 on the hero film and 2 per cutdown. A round is one consolidated set of notes. If the first cut misses the approved brief, I recut it free and that round doesn’t count against your total.'),
+      faq('What if I don’t need long-form video?', 'Then we swap it out. Each long-form edit trades for 2 extra shorts, so Growth becomes 14 short-form edits a month at the same price. In place of the long-form subtitles, you get 4 cover frames for your feed grid and extra-language captions burned into 4 of the shorts. The trade only runs one way — long-form into shorts, not shorts into long-form — because a long-form edit takes several times the work of a short. One condition: shorts are cut from the same batch of footage. If you need 14 shorts from 14 unrelated sources, each one needs its own brief and review, so I’ll quote that separately.'),
       faq('Who owns the final files?', 'Client reserves the right to all agreed upon deliverables.'),
       faq('Is there a minimum commitment?', 'Growth and Studio run in 3-month seasons, because content compounds: your audience and the algorithm need about 90 days of consistent posting before the results show. You’re billed monthly and nothing renews automatically. At the end of the season you choose whether to continue. If month one misses the brief we agreed in writing, you can end the season there and owe nothing more. Starter is always one-time, with no commitment at all.'),
       faq('Do you work outside Lagos and Abuja?', 'Yes, anywhere in Nigeria. For Studio shoots, travel, accommodation and permits are quoted separately and approved by you before anything is booked.'),
@@ -305,5 +454,7 @@ page = page.replace('Pricing — Deji Ajetomobi', 'Pricing — Multimudia')
 page = re.sub(DESC_RE, DESC, page)
 page += '<script>self.__VINEXT_RSC_CHUNKS__=[' + json.dumps(rsc).replace('<', '\\u003c') + '];self.__VINEXT_RSC_DONE__=true</script>'
 page += TOGGLE_JS
+page += render(BUILDER)
+page += '<script type="module" src="/assets/package-builder.js"></script>'
 p.write_text(page)
 print('Built Pricing HTML and RSC from the same content tree.')
