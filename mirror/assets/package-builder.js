@@ -76,13 +76,16 @@ function start() {
       $('[data-package-lines]').innerHTML = html;
     }
 
-    // One video short of the package, and only when it genuinely costs less.
+    // One short-form edit away from a better rate, and only when it really is.
     const nudge = $('[data-nudge]');
     nudge.hidden = !quote.nudge;
     if (quote.nudge) {
-      nudge.textContent = 'Add one more video and the Growth package takes over — ' +
-        RATES.growth.videos + ' videos for ' + formatNaira(quote.nudge.total) +
-        (quote.season ? ' a month' : '') + ', which is less than you’re paying now.';
+      const perMonth = quote.season ? ' a month' : '';
+      nudge.textContent = quote.nudge.route === 'package'
+        ? 'Add one more video and the Growth package takes over — ' + RATES.growth.videos +
+          ' videos for ' + formatNaira(quote.nudge.total) + perMonth + ', which is less than you’re paying now.'
+        : 'Add one more video and the batch rate kicks in — ' + quote.nudge.videos +
+          ' videos for ' + formatNaira(quote.nudge.total) + perMonth + ', which is less than you’re paying now.';
     }
 
     const seasonMeta = $('[data-season-meta]');

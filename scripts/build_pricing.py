@@ -229,7 +229,7 @@ BUILDER = el('dialog', [
             el('p', '', className='build-saving', **{'data-saving': 'true'}, hidden=True),
             el('p', '', className='build-nudge', **{'data-nudge': 'true'}, hidden=True),
             el('div', [
-                el('p', 'Growth covers 12 videos and includes captions, .srt files, extra-language subtitles and priority turnaround. Anything beyond that prices at the package rate.', className='build-note'),
+                el('p', 'Growth covers 15 videos and includes captions, .srt files, extra-language subtitles and priority turnaround. Anything beyond that prices at the package rate.', className='build-note'),
                 el('button', 'See Growth', type='button', className='more-toggle', **{'data-see-growth': 'true'}),
             ], className='build-package-note', **{'data-package-note': 'true'}, hidden=True),
         ], **{'data-quote': 'true'}),
@@ -262,10 +262,10 @@ BUILDER = el('dialog', [
 STARTER = tier(
     'starter', 'STARTER', 'one-time',
     'See exactly what I do with your footage, before you commit to anything.',
-    [price('450,000', 'NGN / one-time', 'A complete five-video set, delivered and ready to post.', per='≈ ₦90,000 per video')],
+    [price('450,000', 'NGN / one-time', 'A complete eight-video set, delivered and ready to post.', per='≈ ₦56,000 per video')],
     cta('Start with Starter', '/checkout', 'pricing-cta pricing-cta-secondary'),
     'One-time payment, no subscription. Upgrade to a Growth season within 14 days and your Starter fee is credited toward month one.',
-    ['4 short-form edits for Reels, Shorts and TikTok', '1 long-form edit', 'Burned-in captions on all shorts',
+    ['7 short-form edits for Reels, Shorts and TikTok', '1 long-form edit', 'Burned-in captions on all shorts',
      'Colour and sound pass on every video', 'Platform-correct exports, named and organised'],
     [('Lengths', 'Shorts 15–90s (9:16) · Long-form up to 20 minutes (16:9)'),
      ('Revisions', '2 rounds per video'),
@@ -274,19 +274,19 @@ STARTER = tier(
 
 GROWTH = tier(
     'growth', 'GROWTH', ('single project', '3-month season'),
-    ('Twelve videos, one project, no ongoing commitment.',
+    ('Fifteen videos, one project, no ongoing commitment.',
      'A full month of content, delivered on schedule, without you chasing anyone.'),
-    [price('680,000', 'NGN / month · 3-month season', 'Twelve videos every month for three months, delivered on schedule, without you having to chase me for any of them.',
-           variant='when-monthly', per='≈ ₦57,000 per video'),
-     price('800,000', 'NGN / one-time', 'A full batch of 12 videos: 10 short-form and 2 long-form, scoped, edited and delivered as one project.',
-           variant='when-once', per='≈ ₦67,000 per video')],
+    [price('680,000', 'NGN / month · 3-month season', 'Fifteen videos every month for three months, delivered on schedule, without you having to chase me for any of them.',
+           variant='when-monthly', per='≈ ₦45,000 per video'),
+     price('800,000', 'NGN / one-time', 'A full batch of 15 videos: 13 short-form and 2 long-form, scoped, edited and delivered as one project.',
+           variant='when-once', per='≈ ₦53,000 per video')],
     book(),
     ('One-time payment. No subscription, no auto-renewal.',
      'Billed monthly across a 3-month season. Nothing auto-renews. At the end you decide if there’s a season two.'),
-    ['10 short-form edits a month', '2 long-form edits a month',
+    ['13 short-form edits a month', '2 long-form edits a month',
      'Burned-in captions plus .srt subtitle files', 'Subtitles in 1 extra language: Hausa, Yoruba, Igbo or Pidgin',
      'First cut in 5 working days',
-     ('12 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
+     ('15 videos delivered across roughly a month, on a schedule we agree upfront.', 'when-once'),
      'Priority turnaround, ahead of one-off projects', 'A 30-minute check-in call each month'],
     [('Lengths', 'Shorts 15s–5 minutes (9:16) · Long-form up to 35 minutes (16:9)'),
      ('Revisions', '3 rounds per video'),
@@ -294,13 +294,13 @@ GROWTH = tier(
      ('Best for', ('Brands with a campaign, launch or backlog to clear in one go.',
                    'Founders, brands and creators posting every week.'))],
     badge='MOST POPULAR', visible=5,
-    swap='No long-form? Swap them for 4 extra shorts — 14 shorts a month, same price.',
+    swap='No long-form? Swap them for 4 extra shorts — 17 shorts a month, same price.',
     detail=(el('p', 'Shorts-only option', className='tier-gets-head tier-swap-head'),
-            el('p', 'Trade the 2 long-form edits for 4 extra shorts: 14 short-form edits a month at the same price. '
+            el('p', 'Trade the 2 long-form edits for 4 extra shorts: 17 short-form edits a month at the same price. '
                     'You still get burned-in captions plus .srt files, 4 cover frames for your feed grid, and '
                     'extra-language captions burned into 4 of the shorts, in place of the long-form '
                     'subtitles. Long-form can be swapped for shorts, not the other way round. Shorts are cut from the '
-                    'same batch of footage — shorts from 14 separate sources are quoted individually.',
+                    'same batch of footage — shorts from 17 separate sources are quoted individually.',
                className='tier-swap-detail')),
     compares=compare_box('₦680,000 a month inside a 3-month season. That’s 15% less for the same work.',
                          '₦800,000 as a one-off, so you save ₦360,000 across the season.'))
@@ -308,11 +308,11 @@ GROWTH = tier(
 STUDIO = band(
     'STUDIO · SHOOT + EDIT',
     'I come to you and film it',
-    'Excludes travel. Up to two directed shoot days at your location, one hero film fully graded and sound-mixed, and 8 short-form cutdowns from the same footage. In a season, that’s up to two shoot days, a hero film and 8 cutdowns every month for three months.',
+    'Excludes travel. Up to two directed shoot days at your location, one hero film fully graded and sound-mixed, and 11 short-form cutdowns from the same footage. In a season, that’s up to two shoot days, a hero film and 11 cutdowns every month for three months.',
     'from ₦2,500,000 per production · or ₦2,125,000 a month in a 3-month season',
     book(className='pricing-cta pricing-cta-secondary band-cta'),
     ['Up to 2 filming days with me and a small crew, anywhere in Nigeria', 'Documentary storytelling, finding the story on the day',
-     '1 hero film, fully graded and sound-mixed', '8 short-form cutdowns from the same shoot',
+     '1 hero film, fully graded and sound-mixed', '11 short-form cutdowns from the same shoot',
      'Licensed music and a full caption and subtitle package', 'Thumbnail pack for the hero film',
      'A 60-minute strategy call before I roll', 'Your raw footage, organised and handed over'],
     [('Lengths', 'Hero film 5–35 minutes · Shorts 15s–5 minutes'),
@@ -398,7 +398,7 @@ main = el('main', [
       faq('What if I have no footage at all?', 'Then Starter and Growth aren’t for you yet. Studio is. I come and film it. If a full production is more than you need right now, book the call anyway and I’ll map out the cheapest way to get usable footage, even if that’s you and a phone on a tripod.'),
       faq('How do I pay?', [el('strong', 'Starter:'), ' Full payment immediately. ', el('strong', 'Growth:'), ' billed monthly, on the same date each month. ', el('strong', 'Studio:'), ' 70% before the shoot, 30% on final delivery. Bank transfer and card both work. Invoices and receipts for organisations and agencies, and I can work with your procurement process.']),
       faq('How many revisions do I get?', 'Starter 2 rounds per video, Growth 3, Studio 3 on the hero film and 2 per cutdown. A round is one consolidated set of notes. If the first cut misses the approved brief, I recut it free and that round doesn’t count against your total.'),
-      faq('What if I don’t need long-form video?', 'Then we swap it out. Each long-form edit trades for 2 extra shorts, so Growth becomes 14 short-form edits a month at the same price. In place of the long-form subtitles, you get 4 cover frames for your feed grid and extra-language captions burned into 4 of the shorts. The trade only runs one way — long-form into shorts, not shorts into long-form — because a long-form edit takes several times the work of a short. One condition: shorts are cut from the same batch of footage. If you need 14 shorts from 14 unrelated sources, each one needs its own brief and review, so I’ll quote that separately.'),
+      faq('What if I don’t need long-form video?', 'Then we swap it out. Each long-form edit trades for 2 extra shorts, so Growth becomes 17 short-form edits a month at the same price. In place of the long-form subtitles, you get 4 cover frames for your feed grid and extra-language captions burned into 4 of the shorts. The trade only runs one way — long-form into shorts, not shorts into long-form — because a long-form edit takes several times the work of a short. One condition: shorts are cut from the same batch of footage. If you need 17 shorts from 17 unrelated sources, each one needs its own brief and review, so I’ll quote that separately.'),
       faq('Who owns the final files?', 'Client reserves the right to all agreed upon deliverables.'),
       faq('Is there a minimum commitment?', 'Growth and Studio run in 3-month seasons, because content compounds: your audience and the algorithm need about 90 days of consistent posting before the results show. You’re billed monthly and nothing renews automatically. At the end of the season you choose whether to continue. If month one misses the brief we agreed in writing, you can end the season there and owe nothing more. Starter is always one-time, with no commitment at all.'),
       faq('Do you work outside Lagos and Abuja?', 'Yes, anywhere in Nigeria. For Studio shoots, travel, accommodation and permits are quoted separately and approved by you before anything is booked.'),

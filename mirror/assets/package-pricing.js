@@ -30,12 +30,9 @@ export const RATES = Object.freeze({
 
   maxPerType: 20,
 
-  // At this many videos the Growth package becomes a route worth pricing.
-  packageVideos: 12,
-
   // The packages the builder prices against.
-  starter: Object.freeze({price: 450000, videos: 5}),
-  growth: Object.freeze({oneTime: 800000, season: 680000, videos: 12, shortForm: 10, longForm: 2}),
+  starter: Object.freeze({price: 450000, videos: 8}),
+  growth: Object.freeze({oneTime: 800000, season: 680000, videos: 15, shortForm: 13, longForm: 2}),
   // Unused long-form allowance converts to shorts at this rate. One way only:
   // shorts never convert back, because a long-form edit is several times the work.
   swapRatio: 2,
@@ -82,9 +79,9 @@ export function pricePackage(cart = {}, options = {}) {
   const best = offers.reduce((a, b) => (b.rate > a.rate ? b : a), {rate: 0, label: null});
   const routeA = videoSubtotal - Math.round(videoSubtotal * best.rate);
 
-  // 2b. Route B, from 12 videos up: the Growth base plus anything past what it
-  //     covers, at the published add-on rates. Long-form allowance the cart does
-  //     not use converts to shorts at swapRatio.
+  // 2b. Route B: the Growth base plus anything past what the package covers, at
+  //     the published add-on rates. Long-form allowance the cart does not use
+  //     converts to shorts at swapRatio.
   const base = season ? RATES.growth.season : RATES.growth.oneTime;
   const addOn = season ? RATES.addOns.season : RATES.addOns.oneTime;
   const coveredLongForm = Math.min(longForm, RATES.growth.longForm);
@@ -96,10 +93,8 @@ export function pricePackage(cart = {}, options = {}) {
   const routeB = base + extraShortsAmount + extraLongFormAmount;
 
   // Charge the lower route, and never less than the package itself.
-  const isPackage = videos >= RATES.packageVideos && routeB <= routeA;
-  const videosAfterDiscount = videos >= RATES.packageVideos
-    ? Math.max(Math.min(routeA, routeB), base)
-    : routeA;
+  const isPackage = routeB <= routeA;
+  const videosAfterDiscount = isPackage ? Math.max(routeB, base) : routeA;
   // The batch and season lines only describe route A; the package has its own.
   const discountRate = isPackage ? 0 : best.rate;
   const discountAmount = isPackage ? 0 : videoSubtotal - routeA;
@@ -114,11 +109,12 @@ export function pricePackage(cart = {}, options = {}) {
   const rushAmount = cart.rush ? Math.round(subtotal * RATES.rushSurcharge) : 0;
   const total = subtotal + rushAmount;
 
-  // One video short of the package: only nudge when it genuinely costs less.
+  // One short-form edit away from a better rate, and only when it really is
+  // better: for a long-form heavy cart the next video costs more, not less.
   let nudge = null;
-  if (videos === RATES.packageVideos - 1 && !options.skipNudge) {
+  if (videos && shorts < RATES.maxPerType && !options.skipNudge) {
     const next = pricePackage({...cart, shorts: shorts + 1}, {skipNudge: true});
-    if (next.total < total) nudge = {total: next.total, videos: next.videos};
+    if (next.total < total) nudge = {total: next.total, videos: next.videos, route: next.route};
   }
 
   return {
