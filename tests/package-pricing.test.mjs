@@ -122,8 +122,8 @@ test('rush is 35% applied last, over the discounted videos plus extras', () => {
 
 test('season mode quotes a month and a season total', () => {
   const quote = pricePackage({shorts: 16, longForm: 2, season: true});
-  assert.equal(quote.total, 821000);
-  assert.equal(quote.seasonTotal, 2463000);
+  assert.equal(quote.total, 774000);
+  assert.equal(quote.seasonTotal, 2322000);
 });
 
 test('one-time mode has no season total', () => {
@@ -163,21 +163,21 @@ test('every cart is charged the lower of the two routes', () => {
   assert.equal(pricePackage({longForm: 12, season: true}).total, 1740000);
 });
 
-test('17 shorts is exactly the Growth price, with the long-form swapped out', () => {
-  const once = pricePackage({shorts: 17});
+test('18 shorts is exactly the Growth price, with the long-form swapped out', () => {
+  const once = pricePackage({shorts: 18});
   assert.equal(once.total, RATES.growth.oneTime);
   assert.equal(once.extraShorts, 0);
   assert.equal(once.extraLongForm, 0);
   assert.equal(once.swapped, true);
-  assert.equal(once.shortAllowance, 17);
-  assert.equal(pricePackage({shorts: 17, season: true}).total, RATES.growth.season);
-  // Which is what the Growth card promises: 13 shorts, or 17 with no long-form.
-  assert.equal(RATES.growth.shortForm + RATES.growth.longForm * RATES.swapRatio, 17);
+  assert.equal(once.shortAllowance, 18);
+  assert.equal(pricePackage({shorts: 18, season: true}).total, RATES.growth.season);
+  // Which is what the Growth card promises: 14 shorts, or 18 with no long-form.
+  assert.equal(RATES.growth.shortForm + RATES.growth.longForm * RATES.swapRatio, 18);
 });
 
 test('Growth includes extra-language subtitles: everything it covers stays at the Growth price', () => {
-  // The package covers 13 shorts + 2 long, or up to 17 shorts with the swap.
-  for (const cart of [{shorts: 15}, {shorts: 16}, {shorts: 17}, {shorts: 13, longForm: 2}]) {
+  // The package covers 14 shorts + 2 long, or up to 18 shorts with the swap.
+  for (const cart of [{shorts: 16}, {shorts: 17}, {shorts: 18}, {shorts: 14, longForm: 2}]) {
     const once = pricePackage({...cart, extraLanguage: true});
     assert.equal(once.total, RATES.growth.oneTime, `${cart.shorts}s+${cart.longForm || 0}L one-time`);
     assert.equal(once.extraLanguageAmount, 0);
@@ -187,12 +187,12 @@ test('Growth includes extra-language subtitles: everything it covers stays at th
 });
 
 test('videos past the package still pay for extra-language subtitles', () => {
-  const quote = pricePackage({shorts: 19, extraLanguage: true});   // 17 covered, 2 beyond
-  assert.equal(quote.languageIncluded, 17);
+  const quote = pricePackage({shorts: 20, extraLanguage: true});   // 18 covered, 2 beyond
+  assert.equal(quote.languageIncluded, 18);
   assert.equal(quote.extraLanguageAmount, 2 * RATES.extraLanguagePerVideo);
   assert.equal(quote.total, RATES.growth.oneTime + 2 * RATES.addOns.oneTime.shortForm + 2 * RATES.extraLanguagePerVideo);
   const items = lineItems(quote);
-  assert.ok(items.some((item) => /included with Growth/.test(item.label) && item.qty === 17 && item.amount === null));
+  assert.ok(items.some((item) => /included with Growth/.test(item.label) && item.qty === 18 && item.amount === null));
   assert.ok(items.some((item) => item.label === 'Subtitles in an extra language' && item.qty === 2 && item.amount === 30000));
 });
 
@@ -203,26 +203,26 @@ test('a la carte carts still pay for extra-language subtitles on every video', (
 });
 
 test('unused long-form allowance converts, and only one way', () => {
-  assert.equal(pricePackage({shorts: 17}).shortAllowance, 17);             // 0 long-form used
-  assert.equal(pricePackage({shorts: 15, longForm: 1}).shortAllowance, 15); // 1 used
-  assert.equal(pricePackage({shorts: 13, longForm: 2}).shortAllowance, 13); // both used
+  assert.equal(pricePackage({shorts: 18}).shortAllowance, 18);             // 0 long-form used
+  assert.equal(pricePackage({shorts: 16, longForm: 1}).shortAllowance, 16); // 1 used
+  assert.equal(pricePackage({shorts: 14, longForm: 2}).shortAllowance, 14); // both used
   // Shorts never buy long-form: 20 shorts still pays full price for each long.
   assert.equal(pricePackage({shorts: 20, longForm: 3}).extraLongForm, 1);
 });
 
 test('videos past the package price at the published add-on rates', () => {
   const once = pricePackage({shorts: 16, longForm: 2});
-  assert.equal(once.extraShorts, 3);
-  assert.equal(once.extraShortsAmount, 3 * RATES.addOns.oneTime.shortForm);
-  assert.equal(once.total, RATES.growth.oneTime + 165000);
+  assert.equal(once.extraShorts, 2);
+  assert.equal(once.extraShortsAmount, 2 * RATES.addOns.oneTime.shortForm);
+  assert.equal(once.total, RATES.growth.oneTime + 110000);
   const season = pricePackage({shorts: 16, longForm: 2, season: true});
-  assert.equal(season.extraShortsAmount, 3 * RATES.addOns.season.shortForm);
-  assert.equal(season.total, RATES.growth.season + 141000);
+  assert.equal(season.extraShortsAmount, 2 * RATES.addOns.season.shortForm);
+  assert.equal(season.total, RATES.growth.season + 94000);
 });
 
 test('the maximum cart prices through the package', () => {
-  assert.equal(pricePackage({shorts: 20, longForm: 20}).total, 3435000);
-  assert.equal(pricePackage({shorts: 20, longForm: 20, season: true}).total, 2917000);
+  assert.equal(pricePackage({shorts: 20, longForm: 20}).total, 3380000);
+  assert.equal(pricePackage({shorts: 20, longForm: 20, season: true}).total, 2870000);
 });
 
 test('no package-route cart prices below the Growth floor', () => {
@@ -263,7 +263,7 @@ test('the nudge only appears when one more short-form edit really costs less', (
   assert.deepEqual(atThreshold.nudge, {total: 891000, videos: 6, route: 'alacarte'});
   // Already on the package: one more short changes nothing, so there is no nudge.
   assert.equal(pricePackage({shorts: 11}).nudge, null);
-  assert.equal(pricePackage({shorts: 17}).nudge, null);
+  assert.equal(pricePackage({shorts: 18}).nudge, null);
   // Below the threshold the next short simply costs more.
   assert.equal(pricePackage({shorts: 5}).nudge, null);
   assert.equal(pricePackage({shorts: 1}).nudge, null);
@@ -320,9 +320,9 @@ test('the booking summary reads as one pasteable line', () => {
 
 test('a package cart summarises as Growth plus what it does not cover', () => {
   assert.equal(summarise(pricePackage({shorts: 16, longForm: 2})),
-    'Growth package (15 videos) + 3 extra short-form edits. One-time. Total ₦965,000.');
-  assert.equal(summarise(pricePackage({shorts: 17})),
-    'Growth package (17 short-form edits, long-form swapped). One-time. Total ₦800,000.');
+    'Growth package (16 videos) + 2 extra short-form edits. One-time. Total ₦910,000.');
+  assert.equal(summarise(pricePackage({shorts: 18})),
+    'Growth package (18 short-form edits, long-form swapped). One-time. Total ₦800,000.');
 });
 
 test('the season summary states the monthly and season figures', () => {
@@ -341,12 +341,12 @@ test('a la carte line items carry the discount as a negative line', () => {
 
 test('package line items itemise the base and what sits past it', () => {
   const items = lineItems(pricePackage({shorts: 16, longForm: 2}));
-  assert.equal(items[0].label, 'Growth package, 15 videos');
+  assert.equal(items[0].label, 'Growth package, 16 videos');
   assert.equal(items[0].amount, RATES.growth.oneTime);
   assert.equal(items[1].label, 'Extra short-form edits');
-  assert.equal(items[1].qty, 3);
+  assert.equal(items[1].qty, 2);
   // A shorts-only cart says so, and charges nothing for the swap.
-  const swapped = lineItems(pricePackage({shorts: 17}));
+  const swapped = lineItems(pricePackage({shorts: 18}));
   assert.equal(swapped[1].amount, null);
   assert.match(swapped[1].label, /swapped for 4 extra shorts/);
 });

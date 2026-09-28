@@ -32,7 +32,7 @@ export const RATES = Object.freeze({
 
   // The packages the builder prices against.
   starter: Object.freeze({price: 450000, videos: 8}),
-  growth: Object.freeze({oneTime: 800000, season: 680000, videos: 15, shortForm: 13, longForm: 2}),
+  growth: Object.freeze({oneTime: 800000, season: 680000, videos: 16, shortForm: 14, longForm: 2}),
   // Unused long-form allowance converts to shorts at this rate. One way only:
   // shorts never convert back, because a long-form edit is several times the work.
   swapRatio: 2,
