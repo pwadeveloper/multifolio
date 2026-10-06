@@ -6,6 +6,9 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1] / 'mirror'
 BOOKING = 'https://calendar.app.google/4Z1x1rKG1f6mJqTu9'
+EMAIL = 'create@multimudia.studio'
+# 07030786526 in international form, which is what wa.me requires.
+WHATSAPP = 'https://wa.me/2347030786526'
 VOID = ('br', 'hr', 'input', 'img')
 ATTR = {'className': 'class', 'htmlFor': 'for', 'defaultChecked': 'checked'}
 
@@ -147,17 +150,25 @@ def extra(key, name, detail):
 def field(label, name, kind, complete, maxlen):
     return el('label', [el('span', label), el('input', type=kind, name=name, autocomplete=complete, maxlength=maxlen)], className='build-field')
 
-def icon(name, children):
-    return el('svg', children, className='copy-icon copy-icon-' + name, viewBox='0 0 20 20',
+def icon(children, className):
+    return el('svg', children, className=className, viewBox='0 0 20 20',
               width='16', height='16', fill='none', stroke='currentColor',
               **{'stroke-width': '1.6', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true'})
+
+def contact(label, href, glyph, external=False):
+    away = {'target': '_blank', 'rel': 'noopener noreferrer'} if external else {}
+    return el('a', [icon(glyph, 'contact-icon'), el('span', label)], href=href, className='contact-link', **away)
+
+ENVELOPE = [el('rect', x='2.75', y='4.25', width='14.5', height='11.5', rx='2'),
+            el('path', d='M3.25 6.25l6.75 4.75 6.75-4.75')]
+BUBBLE = [el('path', d='M16.5 9.6c0 3.2-2.9 5.8-6.5 5.8-.8 0-1.5-.1-2.2-.3L4 16.5l1.3-3.2C4.2 12.3 3.5 11 3.5 9.6c0-3.2 2.9-5.8 6.5-5.8s6.5 2.6 6.5 5.8z')]
 
 def copy_button():
     return el('button', [
         el('span', 'Copy details', **{'data-copy-label': 'true'}),
-        icon('copy', [el('rect', x='7.75', y='7.75', width='8.5', height='8.5', rx='2'),
-                      el('path', d='M12.25 4.75h-7.5a1.5 1.5 0 0 0-1.5 1.5v7.5')]),
-        icon('done', [el('path', d='M4.75 10.5l3.5 3.5 7-7.5')]),
+        icon([el('rect', x='7.75', y='7.75', width='8.5', height='8.5', rx='2'),
+              el('path', d='M12.25 4.75h-7.5a1.5 1.5 0 0 0-1.5 1.5v7.5')], 'copy-icon copy-icon-copy'),
+        icon([el('path', d='M4.75 10.5l3.5 3.5 7-7.5')], 'copy-icon copy-icon-done'),
     ], type='button', className='pricing-cta pricing-cta-secondary', **{'data-copy': 'true'})
 
 def action(label, key, className='pricing-cta', glyph='\u2197'):
@@ -414,6 +425,13 @@ main = el('main', [
     el('h2', 'Let’s work out what you actually need.'),
     el('p', 'Fifteen minutes, no pitch. Tell me what you’re making and I’ll tell you which package fits, or if none of them do.', className='final-cta-lead'),
     el('div', [book(), cta('Start with Starter · ₦450,000', '/checkout', 'pricing-cta pricing-cta-secondary')], className='pricing-actions final-cta-actions'),
+    el('div', [
+      el('p', 'Prefer to write? Reach me directly.', className='contact-lead'),
+      el('div', [
+        contact(EMAIL, 'mailto:' + EMAIL, ENVELOPE),
+        contact('WhatsApp', WHATSAPP, BUBBLE, external=True),
+      ], className='contact-actions'),
+    ], className='final-cta-contact'),
   ], className='pricing-section final-cta', id='start'),
 
   el('footer', [el('span', 'MULTIMUDIA'), el('span', 'God Revealed in Many Media Forms')], className='pricing-footer'),
