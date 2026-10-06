@@ -1,17 +1,73 @@
 /**
- * "Build your own package" — the modal on desktop, the bottom sheet on mobile.
+ * Behaviour for the pricing page: the "See more" disclosures, and the "Build
+ * your own package" modal (a bottom sheet on a phone).
  *
- * Lives outside <main> and owns only its own dialog, so React's hydration of
- * the mirrored page can never revert it (same reason as the disclosure script).
+ * The mirrored site is a React app, so arriving at /pricing from the nav
+ * re-renders <main> on the client and never loads that page's own scripts.
+ * Everything here is therefore delegated from document, which survives both
+ * that and hydration, and the dialog is built on demand rather than read out
+ * of the page. This module is loaded by every page that can reach /pricing.
+ *
  * All money comes from package-pricing.js; nothing here invents a figure.
  */
-import {RATES, pricePackage, lineItems, summarise, formatNaira} from './package-pricing.js';
+import {RATES, pricePackage, lineItems, summarise, formatNaira, WHATSAPP} from './package-pricing.js';
+import markup from './package-dialog.js';
 
-const dialog = document.getElementById('builder');
-const trigger = document.querySelector('[data-build-open]');
-if (dialog && trigger) start();
+let dialog = null;
+let lastTrigger = null;
 
-function start() {
+/** Build the dialog the first time it is asked for, and wire it once. */
+function ensureDialog() {
+  if (dialog && document.body.contains(dialog)) return dialog;
+  dialog = document.getElementById('builder');
+  if (!dialog) {
+    document.body.insertAdjacentHTML('beforeend', markup);
+    dialog = document.getElementById('builder');
+  }
+  if (dialog && !dialog.dataset.wired) {
+    dialog.dataset.wired = '1';
+    wire();
+  }
+  return dialog;
+}
+
+document.addEventListener('click', (event) => {
+  const open = event.target.closest && event.target.closest('[data-build-open]');
+  if (!open) return;
+  lastTrigger = open;
+  if (ensureDialog()) openDialog();
+});
+
+/**
+ * The disclosures. Delegated for the same reason, and it has to measure the
+ * cards before the first one expands so the grid does not jump.
+ */
+document.addEventListener('click', (event) => {
+  const button = event.target.closest && event.target.closest('.more-toggle');
+  if (!button) return;
+  const panel = document.getElementById(button.getAttribute('aria-controls'));
+  if (!panel) return;
+  const grid = document.querySelector('.pricing-tiers');
+  const inGrid = !!(grid && grid.contains(button));
+  const cards = grid ? Array.prototype.slice.call(grid.querySelectorAll('.tier')) : [];
+  if (inGrid && !grid.classList.contains('is-expanded')) {
+    cards.forEach((card) => { card.style.minHeight = Math.round(card.getBoundingClientRect().height) + 'px'; });
+  }
+  const open = button.getAttribute('aria-expanded') !== 'true';
+  button.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) panel.removeAttribute('inert'); else panel.setAttribute('inert', '');
+  const label = button.querySelector('.more-label');
+  if (label) label.textContent = button.getAttribute(open ? 'data-less' : 'data-more');
+  if (inGrid) {
+    const any = !!grid.querySelector('.more-toggle[aria-expanded="true"]');
+    grid.classList.toggle('is-expanded', any);
+    if (!any) cards.forEach((card) => { card.style.minHeight = ''; });
+  }
+});
+
+let openDialog = () => {};
+
+function wire() {
   const $ = (selector, root = dialog) => root.querySelector(selector);
   const $$ = (selector, root = dialog) => Array.prototype.slice.call(root.querySelectorAll(selector));
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -49,7 +105,13 @@ function start() {
 
     $('[data-actions=build]').hidden = step !== 'build';
     paintQuote(quote);
-    if (step === 'book') $('[data-summary]').textContent = summarise(quote);
+    if (step === 'book') {
+      const line = summarise(quote);
+      $('[data-summary]').textContent = line;
+      // Opens WhatsApp with the message already written, so nothing is retyped.
+      $('[data-whatsapp]').href = WHATSAPP + '?text=' +
+        encodeURIComponent('Hi, I built this on your pricing page. ' + line);
+    }
     if (step === 'checkout') paintOrder(quote);
     announce(quote);
     return quote;
@@ -178,23 +240,24 @@ function start() {
   // --- open and close ------------------------------------------------------
 
   let scrollLock = '';
-  function open() {
+  openDialog = function open() {
+    if (dialog.open) return;
     scrollLock = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
     dialog.showModal();
     sizeToViewport();
     goto('build');
-  }
+  };
   function close() { dialog.close(); }
 
   dialog.addEventListener('close', () => {
     document.documentElement.style.overflow = scrollLock;
     dialog.style.transform = '';
     dialog.style.maxHeight = '';
-    trigger.focus({preventScroll: true});   // belt and braces; the dialog does this too
+    // The trigger is React's, so it may have been replaced since it was clicked.
+    if (lastTrigger && document.body.contains(lastTrigger)) lastTrigger.focus({preventScroll: true});
   });
 
-  trigger.addEventListener('click', open);
   dialog.addEventListener('click', (event) => { if (event.target === dialog) close(); });
   $$('[data-close]').forEach((node) => node.addEventListener('click', close));
 

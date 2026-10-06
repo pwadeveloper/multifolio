@@ -8,6 +8,9 @@
  * Imported by the browser (package-builder.js) and by the test suite, so it
  * stays free of DOM and Node APIs.
  */
+/** 07030786526 in the international form wa.me requires. */
+export const WHATSAPP = 'https://wa.me/2347030786526';
+
 export const RATES = Object.freeze({
   // Per-video list prices.
   shortForm: 90000,
