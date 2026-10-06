@@ -175,7 +175,9 @@ function wire() {
 
     $('[data-go-checkout]').disabled = quote.empty;
     $('[data-go-book]').disabled = quote.empty;
-    $('[data-checkout-label]').textContent = quote.empty ? 'Checkout' : 'Checkout — ' + formatNaira(quote.total);
+    $('[data-checkout-label]').textContent = quote.empty ? 'Checkout'
+      : quote.season ? 'A season starts with a call'
+      : 'Checkout — ' + formatNaira(quote.total);
   }
 
   /** The order summary that the customer reads before paying. */
@@ -191,6 +193,8 @@ function wire() {
     $('[data-order]').innerHTML = rows.join('');
     $('[data-season-note]').hidden = !quote.season;
     $('[data-pay-label]').textContent = quote.empty ? 'Checkout' : 'Checkout — ' + formatNaira(quote.total);
+    $('[data-accept-text]').textContent =
+      'I confirm this package and the one-time payment of ' + formatNaira(quote.total) + '.';
   }
 
   const escape = (value) => String(value).replace(/[&<>"]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
@@ -232,6 +236,7 @@ function wire() {
     $$('[data-actions]').forEach((set) => { set.hidden = set.dataset.actions !== next; });
     $('[data-reset]').hidden = next !== 'build';
     $('.builder-body').scrollTop = 0;
+    if (next === 'checkout') { say(''); pay.disabled = false; checkPayments(); }
     render();
     const focus = $('[data-pane=' + next + '] h3, [data-pane=' + next + '] .build-summary, [data-pane=' + next + '] input');
     if (focus && next !== 'build') focus.focus({preventScroll: true});
@@ -317,7 +322,7 @@ function wire() {
   // --- finishing -----------------------------------------------------------
 
   $('[data-go-book]').addEventListener('click', () => goto('book'));
-  $('[data-go-checkout]').addEventListener('click', () => goto('checkout'));
+  $('[data-go-checkout]').addEventListener('click', () => goto(cart.season ? 'book' : 'checkout'));
   $$('[data-back]').forEach((node) => node.addEventListener('click', () => goto('build')));
 
   const apple = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
@@ -354,6 +359,71 @@ function wire() {
     selection.removeAllRanges();
     selection.addRange(range);
   }
+
+  // --- checkout ------------------------------------------------------------
+
+  const pay = $('[data-pay]');
+  const statusLine = $('[data-status]');
+  let paymentConfig = null;
+
+  function say(message, error = false) {
+    statusLine.hidden = !message;
+    statusLine.textContent = message || '';
+    statusLine.dataset.error = error ? 'true' : 'false';
+  }
+
+  /** Whether card payment is open at all, asked once, when it is first needed. */
+  async function checkPayments() {
+    if (paymentConfig) return paymentConfig;
+    try {
+      const response = await fetch('/api/payment-config', {cache: 'no-store'});
+      paymentConfig = await response.json();
+    } catch (error) {
+      paymentConfig = {enabled: false};
+    }
+    if (!paymentConfig.enabled) {
+      pay.disabled = true;
+      say('Card payment is not open yet. Book a call or send the package on WhatsApp and we will sort it out.');
+    }
+    return paymentConfig;
+  }
+
+  const value = (name) => {
+    const field = $('.build-field input[name=' + name + ']');
+    return field ? field.value.trim() : '';
+  };
+
+  pay.addEventListener('click', async () => {
+    const quote = pricePackage(cart);
+    const name = value('name');
+    const email = value('email');
+    if (!name) return say('Enter your name.', true);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return say('Enter a valid email address.', true);
+    if (!$('[data-accept]').checked) return say('Confirm the package and the payment terms first.', true);
+    if (!(await checkPayments()).enabled) return;
+
+    pay.disabled = true;
+    say('Opening secure checkout\u2026');
+    try {
+      // The cart travels, never the price: the server charges what it works out
+      // from the same rates, so the amount cannot be set from here.
+      const response = await fetch('/api/checkout', {
+        method: 'POST', cache: 'no-store', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name, email, phone: value('phone'), accepted: true, currency: 'NGN',
+          cart: {shorts: quote.shorts, longForm: quote.longForm, extraLanguage: quote.extraLanguage,
+                 thumbnails: quote.thumbnails, rush: quote.rush, season: quote.season}
+        })
+      });
+      let data = {};
+      try { data = await response.json(); } catch (error) { /* handled below */ }
+      if (!response.ok || !data.url) throw new Error(data.error || 'Could not open checkout. Please try again.');
+      location.assign(data.url);
+    } catch (error) {
+      say(error.message, true);
+      pay.disabled = false;
+    }
+  });
 
   // --- the sheet: drag to dismiss, and staying clear of the keyboard --------
 

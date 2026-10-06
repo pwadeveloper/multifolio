@@ -305,6 +305,11 @@ width:100%;max-width:1160px;margin:0 auto;padding:var(--s6) var(--s5) var(--s3);
 .build-field span{display:block;font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:var(--fw-medium);letter-spacing:var(--ls-label);text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .build-field input{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-family:inherit;font-size:16px}
 .build-field input:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.build-consent{display:flex;gap:10px;align-items:flex-start;margin-top:var(--s3);font-size:var(--fs-sm);line-height:var(--lh-snug);color:var(--ink-soft);cursor:pointer;text-wrap:pretty}
+.build-consent-input{flex:none;width:20px;height:20px;margin-top:1px;accent-color:var(--ink)}
+.build-consent-input:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.build-status{margin-top:var(--s2);padding:10px 12px;border-radius:10px;background:var(--paper);border:1px solid var(--line);font-size:var(--fs-sm);line-height:var(--lh-snug);color:var(--ink);text-wrap:pretty}
+.build-status[data-error=true]{background:#fdeceb;border-color:#e4b9b4;color:#7d2b22}
 .build-live{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(min-width:768px){.builder{margin:auto}}
 @media(max-width:767px){

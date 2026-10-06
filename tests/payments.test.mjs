@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {initialize,verify,settings,PACKAGE_ID,siteOrigin} from '../lib/payments.js';
+import {initialize,verify,settings,quote,PACKAGE_ID,CUSTOM_PACKAGE_ID,siteOrigin} from '../lib/payments.js';
 import checkout from '../api/checkout.js';
 const env={PAYSTACK_SECRET_KEY:'sk_test_fixture',PAYSTACK_USD_ENABLED:'true'};
 const input={name:'Test customer',email:'customer@example.com',currency:'NGN',accepted:true};
@@ -65,4 +65,64 @@ test('fee-inclusive gross is accepted, underpayment is not, and mismatches name 
  try{ await assert.rejects(()=>verify(ref,env,async()=>ok({...base,amount:1}))); }finally{ console.log=original; }
  const logged=lines.map(line=>JSON.parse(line)).find(entry=>entry.event==='payment.mismatch');
  assert.deepEqual(logged.failed,['amount']);assert.equal(logged.expected,45000000);assert.equal(logged.amount,1);
+});
+
+// --- custom packages from the builder ---------------------------------------
+
+test('a cart is priced on the server, and the browser cannot name its own price',async()=>{
+ let sent;
+ // 6 shorts + 2 long one-time is 800,000 through the package route.
+ const cart={shorts:6,longForm:2,season:false};
+ await initialize({...input,cart,amount:1,total:1},'https://site.test',env,async(_,options)=>{
+  sent=JSON.parse(options.body);return ok({authorization_url:'https://checkout.paystack.com/x',reference:sent.reference});
+ });
+ assert.equal(sent.amount,quote({cart}).amount);
+ assert.equal(sent.amount,80000000);                       // kobo
+ assert.equal(sent.metadata.package_id,CUSTOM_PACKAGE_ID);
+ assert.equal(sent.metadata.amount,80000000);
+ assert.match(sent.metadata.summary,/Growth package/);
+ assert.ok(Array.isArray(sent.metadata.items));
+});
+
+test('no cart still buys Starter at the fixed price',()=>{
+ assert.deepEqual(quote({}),{packageId:PACKAGE_ID,amount:45000000,summary:'Starter package',items:null});
+ assert.equal(quote({cart:null}).amount,45000000);
+});
+
+test('hostile carts are clamped or refused, never priced low',()=>{
+ // Out of range quantities clamp to the maximum rather than inventing a price.
+ assert.equal(quote({cart:{shorts:9999}}).amount,quote({cart:{shorts:20}}).amount);
+ assert.equal(quote({cart:{shorts:-5,longForm:3}}).amount,quote({cart:{longForm:3}}).amount);
+ assert.equal(quote({cart:{shorts:'4'}}).amount,quote({cart:{shorts:4}}).amount);
+ // Nothing to deliver, and shapes that are not a cart.
+ assert.throws(()=>quote({cart:{}}),/at least one video/);
+ assert.throws(()=>quote({cart:{shorts:0,longForm:0}}),/at least one video/);
+ assert.throws(()=>quote({cart:[]}),/Invalid package/);
+ assert.throws(()=>quote({cart:'10 shorts'}),/Invalid package/);
+});
+
+test('a season cart is refused: monthly billing cannot be one card charge',async()=>{
+ assert.throws(()=>quote({cart:{shorts:6,season:true}}),/starts with a call/);
+ await assert.rejects(()=>initialize({...input,cart:{shorts:6,season:true}},'https://site.test',env,()=>{throw Error('must not call');}),/starts with a call/);
+});
+
+test('extras and rush reach the charge',()=>{
+ const plain=quote({cart:{shorts:4}}).amount;
+ assert.ok(quote({cart:{shorts:4,extraLanguage:true}}).amount>plain);
+ assert.ok(quote({cart:{shorts:4,rush:true}}).amount>plain);
+});
+
+test('verification checks a custom order against its own amount, not the Starter price',async()=>{
+ const paid=async(amount,metadata)=>verify(ref,env,async()=>ok({
+  reference:ref,status:'success',amount,currency:'NGN',metadata
+ }));
+ const metadata={package_id:CUSTOM_PACKAGE_ID,amount:80000000,billing:'one_time',summary:'Growth package (16 videos).'};
+ const result=await paid(80000000,metadata);
+ assert.equal(result.paid,true);
+ assert.equal(result.amount,80000000);
+ assert.equal(result.summary,'Growth package (16 videos).');
+ // Paying the Starter price for an 800,000 order is underpayment.
+ await assert.rejects(()=>paid(45000000,metadata),/does not match your package/);
+ // A reference from before custom orders still verifies against the fixed price.
+ assert.equal((await paid(45000000,{package_id:PACKAGE_ID,billing:'one_time'})).amount,45000000);
 });

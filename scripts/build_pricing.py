@@ -239,8 +239,13 @@ BUILDER = el('dialog', [
             field('Full name', 'name', 'text', 'name', '120'),
             field('Email address', 'email', 'email', 'email', '254'),
             field('Phone (optional)', 'phone', 'tel', 'tel', '32'),
+            el('label', [
+                el('input', type='checkbox', className='build-consent-input', **{'data-accept': 'true'}),
+                el('span', '', **{'data-accept-text': 'true'}),
+            ], className='build-consent'),
             el('p', 'Billed monthly across a 3-month season. Nothing auto-renews.', className='build-note', **{'data-season-note': 'true'}),
-            el('p', 'Payment is not connected yet. This step is here for review: wiring it means the server prices the cart from these same rates, so an amount can never be set from the browser.', className='build-note'),
+            el('p', 'Card details are entered on Paystack, never here.', className='build-note'),
+            el('p', '', className='build-status', **{'data-status': 'true', 'role': 'status', 'aria-live': 'polite'}, hidden=True),
         ], **{'data-pane': 'checkout'}, hidden=True),
     ], className='builder-body'),
 
@@ -267,7 +272,7 @@ BUILDER = el('dialog', [
 
         el('div', [
             el('button', [el('span', 'Checkout', **{'data-pay-label': 'true'}), el('span', '\u2197', **{'aria-hidden': 'true'})],
-               type='button', className='pricing-cta', disabled=True, **{'data-pay': 'true'}),
+               type='button', className='pricing-cta', **{'data-pay': 'true'}),
             el('button', 'Back to the builder', type='button', className='more-toggle', **{'data-back': 'true'}),
         ], className='build-actions', **{'data-actions': 'checkout'}, hidden=True),
 
