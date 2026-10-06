@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /checkout
+Disallow: /case-study-modal-preview
+Disallow: /engineering-2
+Disallow: /work-modal-preview
+
+Sitemap: https://multimudia.studio/sitemap.xml

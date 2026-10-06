@@ -446,20 +446,16 @@ main = el('main', [
 
 # Disclosure behaviour. Delegated from document and appended outside <main>, so
 # React never owns it and hydration cannot revert it.
-DESC = 'Video editing and production packages from Multimudia: one-time Starter from ₦450,000, or 3-month Growth and Studio seasons.'
-DESC_RE = r'(?:Pricing details coming soon\.|4 short videos and 1 long-form video\.[^"]*|Video packages for Nigerian founders[^"]*|Video editing and production packages from Multimudia[^"]*)'
+# Head metadata, structured data, robots and sitemap belong to
+# scripts/build_metadata.py. Run it after this.
 
 rsc_path = ROOT / 'pricing.rsc'
 rsc = rsc_path.read_text()
 rsc = re.sub(r'^1:.*$', lambda _: '1:' + json.dumps(main, separators=(',', ':')), rsc, flags=re.M)
-rsc = rsc.replace('Pricing — Deji Ajetomobi', 'Pricing — Multimudia')
-rsc = re.sub(DESC_RE, DESC, rsc)
 rsc_path.write_text(rsc)
 p = ROOT / 'pricing/index.html'
 page = p.read_text().split('<script>self.__VINEXT_RSC_CHUNKS__')[0]
 page = re.sub(r'<main\b.*?</main>', lambda _: render(main), page, flags=re.S)
-page = page.replace('Pricing — Deji Ajetomobi', 'Pricing — Multimudia')
-page = re.sub(DESC_RE, DESC, page)
 page += '<script>self.__VINEXT_RSC_CHUNKS__=[' + json.dumps(rsc).replace('<', '\\u003c') + '];self.__VINEXT_RSC_DONE__=true</script>'
 p.write_text(page)
 

@@ -3,7 +3,7 @@ import path from 'node:path';
 // Explicit public output: never deploy the private admin server, credentials, or old gallery.
 const out='dist';
 await rm(out,{recursive:true,force:true});await mkdir(out,{recursive:true});
-for(const name of ['index.html','.rsc','selected-work.rsc','pricing.rsc','works.json','tick.wav','favicon.ico','favicon.svg','favicon-48x48.png','icon-192.png','icon-512.png','apple-touch-icon.png','site.webmanifest']){
+for(const name of ['index.html','.rsc','selected-work.rsc','pricing.rsc','works.json','tick.wav','favicon.ico','favicon.svg','favicon-48x48.png','icon-192.png','icon-512.png','apple-touch-icon.png','site.webmanifest','robots.txt','sitemap.xml']){
  try{await cp(path.join('mirror',name),path.join(out,name));}catch(error){if(error.code!=='ENOENT')throw error;}
 }
 for(const name of ['selected-work','pricing','checkout','book']){await mkdir(path.join(out,name),{recursive:true});await cp(path.join('mirror',name,'index.html'),path.join(out,name,'index.html'));}
