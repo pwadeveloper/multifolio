@@ -20,6 +20,26 @@ function YouTubeWork({item, videoId}) {
   ]});
 }
 
+/* Instagram answers /embed/ with a redirect to its login page, which sends
+   X-Frame-Options: DENY, so the frame renders as a blank box. There is no
+   version of that iframe that works for a logged-out visitor, and third-party
+   cookies are blocked by default in most browsers anyway, so the card links out
+   instead. Give an item a `poster` (a path under /assets) and it shows that;
+   otherwise it falls back to a titled panel rather than a dead grey rectangle. */
+function LinkWork({item}) {
+  return jsxs('a', {
+    className: 'embed-play', href: item.url, target: '_blank', rel: 'noopener noreferrer',
+    'aria-label': `Watch ${item.title} on Instagram`, children: [
+      item.poster
+        ? jsx('img', {className: 'embed-play-thumb', src: item.poster, alt: '', loading: 'lazy', decoding: 'async'})
+        : jsxs('span', {className: 'embed-play-fallback', children: [
+            jsx('span', {className: 'embed-play-kicker', children: item.category}),
+            jsx('span', {className: 'embed-play-title', children: item.title})
+          ]}),
+      jsx('span', {className: 'embed-play-icon', 'aria-hidden': 'true'})
+    ]});
+}
+
 export default function EmbedWorks({filter = 'All'}) {
   const [items, setItems] = React.useState([]);
   React.useEffect(() => {
@@ -45,7 +65,7 @@ export default function EmbedWorks({filter = 'All'}) {
     return jsxs('article', {
       className: `embed-work embed-work--${item.category === 'Reels' ? 'portrait' : 'landscape'} embed-work--${item.provider}`,
       children: [
-        videoId ? jsx(YouTubeWork, {item, videoId}) : frame(item.embedUrl, item.title),
+        videoId ? jsx(YouTubeWork, {item, videoId}) : jsx(LinkWork, {item}),
         jsxs('div', {className: 'embed-work-caption', children: [jsx('h2', {children: item.title}), jsx('a', {href: item.url, target: '_blank', rel: 'noopener noreferrer', children: 'Open original ↗'})]})
       ]
     }, item.id);

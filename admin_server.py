@@ -154,6 +154,10 @@ class AdminHandler(BaseHTTPRequestHandler):
                     old = next((item for item in items if item['id'] == item_id), {})
                     link.pop('suggestedCategory')
                     entry = {**link, 'id': item_id, 'title': title.strip(), 'category': category, 'createdAt': old.get('createdAt', datetime.now(timezone.utc).isoformat())}
+                    # A poster is added by hand and the form knows nothing about it,
+                    # so carry it across rather than dropping it on the next edit.
+                    if old.get('poster'):
+                        entry['poster'] = old['poster']
                     items = [entry if item['id'] == item_id else item for item in items] if old else [entry, *items]
                 else:
                     self.reply(404, {'error': 'Not found.'})
